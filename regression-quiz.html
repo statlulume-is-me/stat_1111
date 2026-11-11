@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>迴歸觀念診斷｜全民數據科學實驗室</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#DCF0FA; --paper:#EDF6FB; --card:#FFFFFF;
+  --teal:#17798E; --teal-dk:#0E5567; --pink:#E0357F; --pink-lt:#FCE4EF;
+  --ink:#1D3B45; --soft:#5A7580; --faint:#8FA5AE; --line:#C9E2EE;
+  --ok:#128A6E; --ok-lt:#E1F5EE; --no:#C0392B;
+  --band:rgba(23,121,142,.14);
+  --sans:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif;
+  --serif:'Noto Serif TC','Songti TC','PMingLiU',serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E2129; --paper:#132C35; --card:#173540;
+    --teal:#5BC0D3; --teal-dk:#9ADBE8; --pink:#F06AA5; --pink-lt:#3A1E2C;
+    --ink:#E4F2F7; --soft:#A5C0CA; --faint:#6F8D98; --line:#2A5361;
+    --ok:#3CCB9E; --ok-lt:#173A33; --no:#FF7A6B; --band:rgba(91,192,211,.18);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E2129; --paper:#132C35; --card:#173540;
+  --teal:#5BC0D3; --teal-dk:#9ADBE8; --pink:#F06AA5; --pink-lt:#3A1E2C;
+  --ink:#E4F2F7; --soft:#A5C0CA; --faint:#6F8D98; --line:#2A5361;
+  --ok:#3CCB9E; --ok-lt:#173A33; --no:#FF7A6B; --band:rgba(91,192,211,.18);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);
+  line-height:1.8;font-size:16px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+[hidden]{display:none!important}
+button{font:inherit;cursor:pointer;border:none;border-radius:10px;color:inherit;background:none}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+a{color:var(--teal)}
+
+/* 頁首 */
+.mast{padding:44px 20px 20px}
+.crumb{margin:0 0 10px;font-size:14px;color:var(--soft)}
+h1{font-family:var(--serif);font-weight:900;font-size:clamp(30px,5.5vw,44px);line-height:1.2;margin:0}
+.sub{color:var(--soft);margin:12px 0 0;max-width:40em}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;margin-bottom:20px}
+.b1{background:var(--pink);color:#fff;font-weight:700;font-size:16px;padding:13px 22px}
+.b1:hover{filter:brightness(.93)}
+.b1:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.notice{background:var(--pink-lt);border-radius:12px;padding:10px 14px;margin:0 0 18px;font-weight:700}
+.b2{border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;font-size:14.5px;padding:10px 16px}
+.b2:hover{border-color:var(--teal);color:var(--teal)}
+.b2:disabled{opacity:.45;cursor:not-allowed}
+.link{color:var(--soft);font-size:14px;padding:6px 2px;text-decoration:underline;text-underline-offset:3px}
+.link:hover{color:var(--pink)}
+
+/* 開始畫面 */
+fieldset{border:none;margin:0;padding:0}
+legend{font-weight:700;margin-bottom:10px}
+.modes{display:grid;gap:10px;margin-bottom:22px}
+.mode{display:grid;grid-template-columns:22px 1fr;gap:2px 10px;align-items:start;padding:14px 16px;
+  border:1.5px solid var(--line);border-radius:12px;cursor:pointer;background:var(--card)}
+.mode:has(input:checked){border-color:var(--teal);background:var(--paper)}
+.mode input{margin:6px 0 0;accent-color:var(--teal);width:16px;height:16px}
+.mode-t{font-weight:700}
+.mode-d{grid-column:2;color:var(--soft);font-size:14.5px;line-height:1.65}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:14px}
+.field label{display:block;font-size:14px;font-weight:700;color:var(--soft);margin-bottom:6px}
+.field input,.field select{width:100%;font:500 15px var(--sans);padding:11px 12px;border:1.5px solid var(--line);
+  border-radius:10px;background:var(--card);color:var(--ink)}
+.fine{font-size:13.5px;color:var(--soft);margin:0 0 18px}
+
+/* 作答 */
+.qbar{display:flex;align-items:baseline;gap:14px;margin:4px 0 8px;font-size:14.5px;color:var(--soft)}
+.qbar .grow{flex:1}
+.qbar b{color:var(--ink)}
+.prog{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:16px}
+.prog i{display:block;height:100%;width:0;background:var(--teal);transition:width .3s}
+.banner{background:var(--pink-lt);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:14.5px}
+.qtext{font-size:18.5px;font-weight:700;line-height:1.7;margin:0 0 18px}
+.opts{display:grid;gap:10px}
+.opt{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;text-align:left;
+  border:1.5px solid var(--line);background:var(--card);padding:12px 14px;border-radius:12px;font-size:15.5px;line-height:1.65}
+.opt .n{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;
+  background:var(--paper);color:var(--soft);font-weight:700;font-size:13.5px}
+.opt:hover:not(:disabled){border-color:var(--teal)}
+.opt[aria-pressed="true"]{border-color:var(--teal);background:var(--paper)}
+.opt[aria-pressed="true"] .n{background:var(--teal);color:#fff}
+.opt:disabled{cursor:default}
+.opt.is-ok{border-color:var(--ok);background:var(--ok-lt)}
+.opt.is-ok .n{background:var(--ok);color:#fff}
+.opt.is-no{border-color:var(--pink);background:var(--pink-lt)}
+.opt.is-no .n{background:var(--pink);color:#fff}
+.opt.is-dim{opacity:.55}
+.conf{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+.conf p{margin:0 0 10px;font-size:14.5px;color:var(--soft)}
+.conf-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.conf-row button{border:1.5px solid var(--teal);color:var(--teal);font-weight:700;padding:11px 6px;background:var(--card)}
+.conf-row button:hover{background:var(--teal);color:#fff}
+.fb{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+.fb-h{font-weight:700;margin:0 0 6px}
+.fb-h.ok{color:var(--ok)} .fb-h.no{color:var(--pink)}
+.fb p{margin:0 0 8px}
+.mis{background:var(--paper);border-left:4px solid var(--pink);border-radius:0 10px 10px 0;padding:10px 14px;margin:10px 0}
+.mis p{margin:0 0 4px;font-size:15px}
+.meta{font-size:14px;color:var(--soft)}
+.qnext{display:flex;justify-content:flex-end;margin-top:14px}
+.keys{font-size:13px;color:var(--faint);text-align:center}
+
+/* 結果 */
+.r-level{font-family:var(--serif);font-weight:900;font-size:clamp(34px,7vw,52px);line-height:1.15;margin:0}
+.r-line{margin:8px 0 0;color:var(--soft)}
+.r-line b{color:var(--ink)}
+h2{font-family:var(--serif);font-weight:900;font-size:22px;line-height:1.35;margin:0 0 6px}
+.h2-sub{color:var(--soft);font-size:14.5px;margin:0 0 14px}
+.chart{width:100%;height:auto;display:block}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .zero{stroke:var(--faint);stroke-dasharray:4 4}
+.chart .tick{fill:var(--faint);font-size:12px;font-family:var(--sans)}
+.chart .lvl{fill:var(--soft);font-size:13px;font-weight:700;font-family:var(--sans)}
+.chart .band{fill:var(--band)}
+.chart .path{fill:none;stroke:var(--teal);stroke-width:2.5;stroke-linejoin:round}
+.chart .dot-ok{fill:var(--teal);stroke:var(--card);stroke-width:2}
+.chart .dot-no{fill:var(--card);stroke:var(--pink);stroke-width:2.5}
+.chart .diff{fill:none;stroke:var(--faint);stroke-width:1.5}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;color:var(--soft);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lg{display:inline-block;width:12px;height:12px;border-radius:50%}
+.lg.ok{background:var(--teal)} .lg.no{border:2.5px solid var(--pink)}
+.lg.df{border:1.5px solid var(--faint);border-radius:0;transform:rotate(45deg);width:9px;height:9px}
+.lg.bd{background:var(--band);border-radius:3px;width:18px}
+.cmap{display:grid;gap:2px}
+.crow{display:grid;grid-template-columns:minmax(120px,190px) 1fr auto;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+.crow:last-child{border-bottom:none}
+.dots{display:flex;flex-wrap:wrap;gap:5px}
+.d{width:14px;height:14px;border-radius:50%}
+.d.ok{background:var(--teal)} .d.no{border:2.5px solid var(--pink)}
+.none{color:var(--faint);font-size:13.5px}
+.crow a{font-size:13.5px;white-space:nowrap}
+.mcard{border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;background:var(--card)}
+.mcard.strong{border-color:var(--pink)}
+.mhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:6px}
+.mhead b{font-size:17px}
+.tag{font-size:13px;font-weight:700;padding:1px 10px;border-radius:99px;background:var(--pink-lt);color:var(--pink)}
+.tag.mid{background:var(--paper);color:var(--soft)}
+.tag.good{background:var(--ok-lt);color:var(--ok)}
+.mcard p{margin:0 0 6px;font-size:15px}
+.mcard .ev{font-size:13.5px;color:var(--soft)}
+.acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.acts a{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:10px;padding:9px 14px;
+  font-weight:700;font-size:14.5px;text-decoration:none;color:var(--teal)}
+.acts a:hover{border-color:var(--teal)}
+.data-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.status{font-size:14px;color:var(--soft);margin:10px 0 0}
+.foot{font-size:13px;color:var(--faint);text-align:center;padding:10px 0 40px}
+@media (max-width:560px){
+  .card{padding:18px}
+  .crow{grid-template-columns:1fr auto;}
+  .crow .dots{grid-column:1/-1;grid-row:2}
+  .qtext{font-size:17.5px}
+  .chart .tick{font-size:17px}
+  .chart .lvl{font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<script>/* 依題目類型的答對率（套用新題庫.py 加的） */
+window.__QT=function(rows,types,color){
+  var by={};rows.forEach(function(r){if(!r.t)return;var o=by[r.t]||(by[r.t]={n:0,ok:0});o.n++;if(r.ok)o.ok++;});
+  var e=function(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});};
+  var h='<div class="qt-box" style="margin:14px 0"><div style="font-weight:800;margin:0 0 4px">依題目類型看答對率</div>'+
+    '<div style="font-size:13px;opacity:.75;margin:0 0 10px">題庫分成 '+types.length+' 類；這次沒考到的類型顯示「—」。每類題數不多，看方向就好。</div>';
+  types.forEach(function(t){var o=by[t],p=o?Math.round(o.ok/o.n*100):null;
+    h+='<div style="display:grid;grid-template-columns:minmax(0,11em) 1fr 4.6em;gap:10px;align-items:center;margin:6px 0;font-size:14px">'+
+      '<span>'+e(t)+'</span><span style="height:10px;border-radius:99px;background:rgba(128,128,128,.18);overflow:hidden">'+
+      (o?'<i style="display:block;height:100%;width:'+p+'%;background:'+(p<60?'#c0392b':(color||'#2a78d6'))+'"></i>':'')+'</span>'+
+      '<span style="text-align:right;font-variant-numeric:tabular-nums">'+(o?o.ok+'／'+o.n:'—')+'</span></div>';});
+  return h+'</div>';
+};
+</script>
+<style>/* 背景花紋只在兩側（做上線版.py 加的） */body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cg fill='%2317798E'%3E%3Ccircle cx='40' cy='120' r='5'/%3E%3Ccircle cx='70' cy='92' r='4'/%3E%3Ccircle cx='98' cy='84' r='5'/%3E%3Ccircle cx='128' cy='52' r='4'/%3E%3C/g%3E%3Cline x1='28' y1='128' x2='142' y2='44' stroke='%2317798E' stroke-width='2.5'/%3E%3Cg fill='%2317798E'%3E%3Ccircle cx='220' cy='300' r='5'/%3E%3Ccircle cx='250' cy='272' r='4'/%3E%3Ccircle cx='282' cy='262' r='5'/%3E%3Ccircle cx='310' cy='232' r='4'/%3E%3C/g%3E%3Cline x1='208' y1='308' x2='324' y2='224' stroke='%2317798E' stroke-width='2.5'/%3E%3C/svg%3E");background-size:360px 360px;opacity:0.16;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(50% - 440px),transparent calc(50% - 400px),transparent calc(50% + 400px),#000 calc(50% + 440px),#000 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(50% - 440px),transparent calc(50% - 400px),transparent calc(50% + 400px),#000 calc(50% + 440px),#000 100%)}</style>
+<style>/* iOS 防自動放大（做上線版.py 加的） */@supports (-webkit-touch-callout:none){input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]),textarea,select{font-size:16px!important}}</style>
+</head>
+<body>
+<header class="wrap mast">
+  <a href="index.html" style="display:inline-block;margin:0 0 10px;font-size:14px;font-weight:700;color:inherit;opacity:.7;text-decoration:none">← 選主題</a>
+  <p class="crumb">全民數據科學實驗室 ／ 迴歸分析</p>
+  <h1>迴歸觀念診斷</h1>
+  <p class="sub">每題選一個答案，再告訴我們你有多確定。答完會指出你卡在哪個觀念，並帶你回去玩對應的實驗。</p>
+</header>
+
+<main class="wrap">
+<!-- 開始 -->
+<section id="vStart">
+  <div class="card">
+    <p class="notice" id="notice" hidden></p>
+    <fieldset class="modes" id="modeBox">
+      <legend>選擇作答方式</legend>
+      <label class="mode"><input type="radio" name="mode" value="cat" checked>
+        <span class="mode-t">適性診斷</span>
+        <span class="mode-d">8 到 15 題，大約 10 分鐘。下一題的難度會依你前面的作答調整。</span></label>
+      <label class="mode"><input type="radio" name="mode" value="pre">
+        <span class="mode-t">前測</span>
+        <span class="mode-d">固定 12 題，在上課或玩實驗之前做。作答時不會顯示解答。</span></label>
+      <label class="mode"><input type="radio" name="mode" value="post">
+        <span class="mode-t">後測</span>
+        <span class="mode-d">另一份難度相同的 12 題，學完之後做，用來和前測比較。</span></label>
+      <label class="mode"><input type="radio" name="mode" value="cal">
+        <span class="mode-t">題庫練習（研究用）</span>
+        <span class="mode-d">100 題隨機出題，請至少完成 60 題。你的作答會用來估計每一題的難度。</span></label>
+    </fieldset>
+    <div class="fields">
+      <div class="field"><label for="who">作答代號</label>
+        <input id="who" maxlength="24" autocomplete="off" placeholder="例如 R07；留白會自動產生"></div>
+      <div class="field"><label for="age">身分</label>
+        <select id="age">
+          <option value="">請選擇</option>
+          <option>國小</option><option>國中</option><option>高中職</option>
+          <option>大學（非統計相關科系）</option><option>大學（統計相關科系）</option>
+          <option>研究所</option><option>社會人士</option>
+        </select></div>
+      <div class="field"><label for="bg">學過統計嗎？</label>
+        <select id="bg">
+          <option value="">請選擇</option>
+          <option>沒學過</option><option>高中數學學過一點</option><option>修過統計課</option>
+        </select></div>
+    </div>
+    <p class="fine">紀錄只包含代號、選項、信心程度與作答時間，不含姓名。</p>
+    <p class="notice" id="closedMsg" hidden>目前沒有開放作答，請等老師通知後再重新整理這一頁。</p>
+    <button class="b1" id="goStart" type="button">開始作答</button>
+  </div>
+</section>
+
+<!-- 作答 -->
+<section id="vQuiz" hidden>
+  <div class="qbar"><span id="qMode"></span><span class="grow" id="qCount"></span>
+    <button class="link" id="goQuit" type="button">結束作答</button></div>
+  <div class="prog"><i id="qProg"></i></div>
+  <div class="banner" id="qBanner" hidden></div>
+  <article class="card">
+    <p class="qtext" id="qText"></p>
+    <div class="opts" id="qOpts" role="group" aria-label="選項"></div>
+    <div class="conf" id="qConf" hidden>
+      <p>你有多確定？按下去就會送出答案。</p>
+      <div class="conf-row">
+        <button type="button" data-c="1">用猜的</button>
+        <button type="button" data-c="2">有點把握</button>
+        <button type="button" data-c="3">很確定</button>
+      </div>
+    </div>
+    <div class="fb" id="qFb" hidden aria-live="polite"></div>
+    <div class="qnext"><button class="b1" id="goNext" type="button" hidden>下一題</button></div>
+  </article>
+  <p class="keys">鍵盤操作：按 1 到 4 選答案，答完後按 Enter 到下一題。</p>
+</section>
+
+<!-- 結果 -->
+<section id="vResult" hidden></section>
+</main>
+<p class="foot">全民數據科學實驗室 ／ 迴歸分析題庫 v2</p>
+
+<script>
+(function(){
+"use strict";
+/* ================= 設定 ================= */
+const CFG={
+  MIN_ITEMS:8,        // 適性診斷最少題數
+  MAX_ITEMS:15,       // 適性診斷最多題數
+  SE_STOP:0.5,        // 能力估計誤差低於此值即停止
+  CAL_MIN:60,         // 題庫練習的最低建議題數
+  REM_ITEMS:3,        // 每個迷思的補強題數
+  SUBMIT_URL:"https://script.google.com/macros/s/AKfycbzxnekd2r0eZHjAXaXA-o-5ASAQwuCFF7Ui9Gz8hWq7WS67PzVWrm_bWL37y7Bubm77Pg/exec",      // 填入 Google Apps Script 網址後，會自動把紀錄送到試算表
+  LAB_URL:"regression.html",  // 互動實驗頁的網址（相對或絕對）
+  HOME_URL:"index.html",        // 首頁網址；有填才會在結果頁顯示「回首頁」
+  VERSION:"reg-bank-v2"
+};
+const DATA={"bank": [{"id": "R0101", "c": "C01", "lv": 1, "d": 2, "b": 0.0, "exp": 1, "q": "迴歸分析最主要在做什麼？", "o": ["證明其中一個變數是造成另一個變數改變的原因", "用一個變數的變化，去描述或預測另一個變數的變化", "把資料分成幾個彼此相似的群組，再分別替每一群命名", "找出一組資料裡出現最多次的那一個數值"], "k": 1, "m": ["M01", "", "", ""], "ex": "迴歸描述「Y 怎麼隨 X 變」，並用這個規則來預測。它本身不證明因果；把資料分群則是 K-means 的工作。", "f": "A", "t": "基本概念與散佈圖"}, {"id": "R0207", "c": "C02", "lv": 2, "d": 2, "b": 0.0, "exp": 2, "q": "「身高越高，體重通常也越重」，這種「一個變大、另一個也跟著變大」的關係叫什麼？", "o": ["完全沒有關係", "正相關", "因果關係", "負相關"], "k": 1, "m": ["", "", "M01", ""], "ex": "兩個變數一起變大叫正相關；一個變大、另一個變小則叫負相關。", "f": "", "t": "基本概念與散佈圖"}, {"id": "R0208", "c": "C02", "lv": 2, "d": 2, "b": 0.0, "exp": 2, "q": "「冬天氣溫越低，熱湯的銷量越高」，氣溫和熱湯銷量是哪一種關係？", "o": ["負相關，氣溫變低時銷量變高", "沒有關係，兩者各自獨立", "熱湯銷量增加，造成氣溫下降", "正相關，氣溫變低時銷量也變低"], "k": 0, "m": ["", "", "M03", ""], "ex": "一個變小、另一個變大，方向相反，就是負相關。", "f": "", "t": "基本概念與散佈圖"}, {"id": "R0105", "c": "C01", "lv": 3, "d": 2, "b": 0.0, "exp": 1, "q": "便利商店店長用「前一天的最高氣溫」預測「隔天冰品的銷量」。他的做法和迴歸有什麼共通點？", "o": ["只要有一天的資料，就足以畫出一條可靠的趨勢線", "找出冰品賣得好的真正原因，再對症下藥", "只要氣溫資料正確，每天的預測都會完全準確", "用已經知道的一件事，推估另一件還不知道的事"], "k": 3, "m": ["M15", "M01", "M10", ""], "ex": "迴歸的精神是「用知道的去猜不知道的」，而且一定帶有誤差。它不保證每次都準，也不代表找到了原因。", "f": "", "t": "基本概念與散佈圖"}, {"id": "R0201", "c": "C02", "lv": 1, "d": 2, "b": 0.0, "exp": 2, "q": "散佈圖上的「一個點」代表什麼？", "o": ["一個對象（例如一位同學）的兩個數值", "某一個變數所有數值加起來的總和", "兩個變數各自的平均數", "迴歸線在這個位置算出來的一個預測值"], "k": 0, "m": ["", "", "", ""], "ex": "散佈圖的每個點是一筆觀測：同一個對象在 X 和 Y 上的兩個數值。", "f": "B", "t": "基本概念與散佈圖"}, {"id": "R0202", "c": "C02", "lv": 2, "d": 2, "b": 0.0, "exp": 2, "q": "散佈圖上的點大致從左上往右下排列，最適合怎麼描述？", "o": ["點往下走，代表兩者的關係很弱", "X 越大，Y 大致越小，是負相關", "點沒有排成一直線，所以看不出關係", "X 越大，Y 也越大，是正相關"], "k": 1, "m": ["M05", "", "", ""], "ex": "左上到右下代表 X 增加時 Y 大致減少，也就是負相關。往下走描述的是方向，不是強弱。", "f": "", "t": "基本概念與散佈圖"}, {"id": "R0209", "c": "C02", "lv": 2, "d": 2, "b": 0.0, "exp": 2, "q": "小華想知道「每天喝越多咖啡，睡得是不是越少」。他應該蒐集哪種資料？", "o": ["所有人睡眠時數的平均值，再加上總共有幾個人", "只量他自己某一天的睡眠時數，其他人不用管", "全班同學的血型與星座，每人各填一個答案", "很多人各自的「咖啡杯數」和「睡眠時數」兩個數字"], "k": 3, "m": ["", "", "", ""], "ex": "迴歸需要「成對」的資料：同一個人同時有 X（咖啡）和 Y（睡眠）兩個數字。", "f": "", "t": "基本概念與散佈圖"}, {"id": "R0210", "c": "C02", "lv": 2, "d": 2, "b": 0.0, "exp": 2, "q": "小明讀 1 小時考 40 分、讀 3 小時考 70 分、讀 5 小時考 90 分。讀書時數和分數大致是什麼關係？", "o": ["讀越久，分數越低", "讀越久，分數越高", "看不出任何關係", "分數永遠不變"], "k": 1, "m": ["", "", "", ""], "ex": "三筆資料都是「時數增加、分數也增加」，所以是正向關係。", "f": "", "t": "基本概念與散佈圖"}, {"id": "R0511", "c": "C05", "lv": 2, "d": 2, "b": 0.0, "exp": 4, "q": "散佈圖上的點越貼近那條迴歸直線，表示兩個變數的關係大致越怎麼樣？", "o": ["越強", "越弱", "不變", "無法判斷"], "k": 0, "m": ["", "", "", ""], "ex": "點越緊貼直線，代表用一個變數來預測另一個越準，關係越強。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0709", "c": "C07", "lv": 3, "d": 2, "b": 0.0, "exp": 3, "q": "用迴歸線預測出來的結果，和實際結果會完全一模一樣嗎？", "o": ["會，只要資料筆數夠多，預測就會和實際一模一樣", "通常不會，預測只是大致的傾向，一定有誤差", "會，只要把迴歸線畫得夠準，每個人都會剛好落在線上", "只有預測出來的結果剛好是整數時，才會和實際一樣"], "k": 1, "m": ["M10", "", "M10", ""], "ex": "迴歸預測的是「平均來說會怎樣」，每個人實際上都會上下有些差距。", "f": "", "t": "基本概念與散佈圖"}, {"id": "R0801", "c": "C08", "lv": 1, "d": 2, "b": 0.0, "exp": 8, "q": "什麼是「離群值」？", "o": ["資料中出現次數最多、最具代表性的那個數值", "明顯偏離其他資料整體模式的觀測值", "剛好落在迴歸線上的資料點", "數值剛好等於平均數的資料點"], "k": 1, "m": ["", "", "", ""], "ex": "離群值是明顯不符合整體模式的點。它可能是錯誤，也可能是真實的特殊情況。", "f": "A", "t": "離群值與模型診斷"}, {"id": "R0902", "c": "C09", "lv": 3, "d": 2, "b": 0.0, "exp": 13, "q": "夏天冰淇淋賣得越多，溺水人數也越多。最合理的解釋是什麼？", "o": ["吃冰淇淋之後馬上下水，比較容易抽筋溺水", "純屬巧合，兩者背後沒有任何共同原因", "天氣熱，同時讓人買冰淇淋、也讓人去玩水", "溺水獲救的人，事後比較想吃冰淇淋壓驚"], "k": 2, "m": ["M01", "", "", "M03"], "ex": "氣溫同時推高了兩者，這就是混淆變數（第三個變數）。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R0910", "c": "C09", "lv": 4, "d": 2, "b": 0.0, "exp": 13, "q": "鞋子尺碼和身高呈正相關（腳大的人通常比較高）。這代表「買大一號的鞋子就會長高」嗎？", "o": ["不一定，要看買的是哪一個品牌的鞋子", "會，因為兩者有相關，就代表鞋子大小會影響身高", "不會，兩者一起變動不代表其中一個造成另一個", "會，只要鞋子穿得夠久，身體就會跟著長高"], "k": 2, "m": ["", "M01", "", "M01"], "ex": "有相關不等於有因果。腳大和個子高，是因為都和年齡、體型有關。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R0710", "c": "C07", "lv": 3, "d": 2, "b": 0.0, "exp": 3, "q": "某孩子 5 歲時身高 110 公分，每年長高約 6 公分。照這條直線一路推到 50 歲，會預測他身高約 380 公分。這個結果說明什麼？", "o": ["預測得很準，他以後會長得非常高", "身高越長越快，所以 380 公分是合理的", "直線只在資料附近可靠，不能無限延伸出去預測", "資料一定算錯了，應該重新蒐集"], "k": 2, "m": ["M09", "M09", "", ""], "ex": "超出資料範圍的預測（外推）很容易離譜。人不會一直長高，這條直線只適用於成長階段。", "f": "", "t": "迴歸線與預測"}, {"id": "R0403", "c": "C04", "lv": 3, "d": 2, "b": 0.0, "exp": 3, "q": "用「預測分數 ＝ 38 ＋ 7 × 讀書時數」預測讀 4 小時的同學，預測分數是多少？", "o": ["66 分", "28 分", "49 分", "180 分"], "k": 0, "m": ["", "", "", ""], "ex": "38 + 7 × 4 = 38 + 28 = 66。先乘再加。", "f": "", "t": "迴歸線與預測"}, {"id": "R0608", "c": "C06", "lv": 2, "d": 2, "b": 0.0, "exp": 12, "q": "下列哪一張散佈圖，最適合用一條「直線」來代表？", "o": ["點平均散佈在整個正方形裡", "點排成一個圓圈", "點排成一個「U」字形", "點大致沿著一條斜線，排成一條窄帶"], "k": 3, "m": ["", "", "M07", ""], "ex": "迴歸直線適合描述「大致沿直線走」的關係；圓圈、U 形或一團亂的資料，直線都代表不了。", "f": "B", "t": "基本概念與散佈圖"}, {"id": "R0211", "c": "C02", "lv": 2, "d": 2, "b": 0.0, "exp": 2, "q": "下列哪一組變數，最有可能在散佈圖上看到明顯的趨勢？", "o": ["身分證字號尾數與考試分數", "手機品牌與生日月份", "座號與喜歡的顏色", "每天讀書時數與考試分數"], "k": 3, "m": ["", "", "", ""], "ex": "每天讀書時數和成績在生活上有合理的連結；其餘幾組沒有道理會一起變動。", "f": "", "t": "基本概念與散佈圖"}, {"id": "R0512", "c": "C05", "lv": 2, "d": 2, "b": 0.0, "exp": 4, "q": "散佈圖上的點幾乎都緊貼著一條往右上的直線，這時相關係數 r 最可能接近多少？", "o": ["接近 −1", "接近 +1", "接近 100", "接近 0"], "k": 1, "m": ["", "", "", ""], "ex": "r 越接近 +1，代表點越緊貼往右上的直線；−1 是緊貼往右下的直線；0 是看不出直線關係。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0410", "c": "C04", "lv": 2, "d": 2, "b": 0.0, "exp": 3, "q": "身高用「公分」量、體重用「公斤」量，單位不一樣，還可以放在一起做迴歸分析嗎？", "o": ["可以，X 和 Y 的單位不必相同", "只有在兩者數字大小差不多時可以", "不行，兩個變數的單位必須一模一樣", "不行，必須先把兩者都換成公斤"], "k": 0, "m": ["", "", "", ""], "ex": "迴歸本來就常用不同單位的兩個變數，斜率的單位就是「Y 的單位 ÷ X 的單位」。", "f": "", "t": "基本概念與散佈圖"}, {"id": "R0310", "c": "C03", "lv": 1, "d": 2, "b": 0.0, "exp": 1, "q": "迴歸線和「隨手拿尺畫的一條線」最大的差別是什麼？", "o": ["迴歸線是依明確準則，找出整體誤差最小的那一條", "迴歸線一定會穿過原點，隨手畫的線則不一定", "迴歸線一定會剛好穿過最多個資料點", "沒有差別，只要看起來差不多，隨手畫的線也算迴歸線"], "k": 0, "m": ["", "", "M08", ""], "ex": "迴歸線不靠感覺畫，而是用「整體預測誤差最小」這個準則算出來，所以每個人算的結果都一樣。", "f": "", "t": "基本概念與散佈圖"}, {"id": "R0102", "c": "C01", "lv": 2, "d": 2, "b": 0.0, "exp": 1, "q": "「每天滑手機的時間，能不能用來預測睡眠時數？」在這個問題中，應變數（Y）是哪一個？", "o": ["每天滑手機的時間", "滑手機時間與睡眠時數的相關係數", "兩個都是 Y，迴歸不區分誰是 X、誰是 Y", "睡眠時數"], "k": 3, "m": ["M18", "", "M18", ""], "ex": "想被預測、被解釋的是 Y。這裡想知道睡眠怎麼隨滑手機時間變化，所以睡眠時數是 Y。", "f": "B", "t": "基本概念與散佈圖"}, {"id": "R0104", "c": "C01", "lv": 1, "d": 2, "b": 0.0, "exp": 1, "q": "「簡單線性迴歸」裡的「簡單」指的是什麼？", "o": ["只用一個自變數 X 來描述 Y", "資料筆數少，通常不會超過 30 筆", "計算步驟簡單，不用電腦也能算出來", "結論容易解讀，所以結果比較可靠"], "k": 0, "m": ["", "", "", ""], "ex": "只有一個 X 叫簡單迴歸；用兩個以上的 X 描述 Y 叫複迴歸。「簡單」跟計算難度、資料量都無關。", "f": "", "t": "基本概念與散佈圖"}, {"id": "R0510", "c": "C05", "lv": 3, "d": 2, "b": 0.0, "exp": 4, "q": "下面四種散佈圖，哪一種的 r 最接近 0？", "o": ["點沿著一條很平緩的直線緊密排列", "點沿著一條往右下的直線緊密排列", "點大致往右上，但分散得比較開", "點散成一團圓形的雲，看不出方向"], "k": 3, "m": ["M04", "M05", "", ""], "ex": "r 看的是點貼不貼近一條直線，不看線陡不陡。平緩但整齊的點 r 仍然接近 ±1；往右下緊密排列是強負相關。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0205", "c": "C02", "lv": 2, "d": 2, "b": 0.0, "exp": 2, "q": "下列哪一組資料「不適合」直接畫成散佈圖？", "o": ["各縣市的機車數量與交通事故件數", "每天的最高氣溫與便利商店冷飲的銷售杯數", "每位同學的身高與鞋子尺寸", "每位同學的血型與最喜歡的手搖飲口味"], "k": 3, "m": ["", "", "", ""], "ex": "散佈圖需要兩個數值變數。血型和口味都是類別，畫成點沒有「往右越大」的意義。", "f": "A", "t": "基本概念與散佈圖"}, {"id": "R0301", "c": "C03", "lv": 1, "d": 2, "b": 0.0, "exp": 1, "q": "迴歸分析中的「殘差」是什麼？", "o": ["資料中最大值與最小值之間的差距", "實際值減去迴歸線預測值的差距", "兩個變數之間相關係數的大小", "迴歸線的斜率，也就是線的傾斜程度"], "k": 1, "m": ["", "", "", ""], "ex": "殘差 = 實際值 − 預測值，也就是點到迴歸線的垂直距離（帶正負號）。", "f": "", "t": "基本概念與散佈圖"}, {"id": "R0302", "c": "C03", "lv": 3, "d": 2, "b": 0.0, "exp": 1, "q": "迴歸線預測小明考 66 分，他實際考了 70 分。小明的殘差是多少？", "o": ["66", "+4", "−4", "70"], "k": 1, "m": ["", "", "", ""], "ex": "殘差 = 實際值 − 預測值 = 70 − 66 = +4。正的殘差代表實際比預測高，點在線的上方。", "f": "", "t": "迴歸線與預測"}, {"id": "R0303", "c": "C03", "lv": 2, "d": 2, "b": 0.0, "exp": 1, "q": "一個資料點的殘差是負的，代表什麼？", "o": ["這個點在迴歸線下方，實際值比預測值小", "這個點不符合趨勢，應該從資料中刪除", "這個點的 X 是負數，所以殘差也跟著變負", "這個點在迴歸線上方，實際值比預測值大"], "k": 0, "m": ["", "M12", "", ""], "ex": "殘差 = 實際 − 預測。負的殘差代表實際值比較小，點落在線的下方。在線下方是正常的，不代表資料有問題。", "f": "", "t": "迴歸線與預測"}, {"id": "R0401", "c": "C04", "lv": 2, "d": 2, "b": 0.0, "exp": 3, "q": "迴歸線「預測分數 ＝ 38 ＋ 7 × 讀書時數」中，「7」代表什麼？", "o": ["讀書時數與分數的相關係數是 0.7", "全班同學平均讀了 7 小時的書", "每多讀一小時，每個人的分數一定多 7 分", "每多讀一小時，分數平均多 7 分"], "k": 3, "m": ["M04", "", "M10", ""], "ex": "7 是斜率：X 每增加 1，Y 平均增加 7。它是平均傾向，不是每個人的保證；斜率也不等於相關係數。", "f": "", "t": "迴歸線與預測"}, {"id": "R0402", "c": "C04", "lv": 2, "d": 2, "b": 0.0, "exp": 3, "q": "同一條迴歸線「預測分數 ＝ 38 ＋ 7 × 讀書時數」中，「38」代表什麼？", "o": ["全班同學這次考試的平均分數，也就是中心", "全班分數最低那位同學的分數", "讀書時數為 0 時，模型預測的分數", "每多讀一小時所增加的分數"], "k": 2, "m": ["", "", "", ""], "ex": "38 是截距：X = 0 時的預測值。它不是平均分數，也不是最低分。", "f": "", "t": "迴歸線與預測"}, {"id": "R0404", "c": "C04", "lv": 2, "d": 2, "b": 0.0, "exp": 3, "q": "迴歸線的斜率是負的，代表什麼？", "o": ["X 增加時，Y 平均會減少", "X 和 Y 之間的關係很弱", "X 增加時，Y 平均也會增加", "計算過程一定是哪裡出錯了"], "k": 0, "m": ["", "M05", "", ""], "ex": "負斜率代表方向往右下：X 越大，Y 平均越小。正負號描述方向，不代表強弱。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0405", "c": "C04", "lv": 2, "d": 2, "b": 0.0, "exp": 3, "q": "一條迴歸線的斜率等於 0，代表什麼？", "o": ["不論 X 是多少，預測的 Y 全部都等於 0", "這條線會是一條垂直線", "不論 X 怎麼變，預測的 Y 都一樣", "資料中所有 X 都等於 0"], "k": 2, "m": ["", "", "", ""], "ex": "斜率 0 代表線是水平的：X 改變，預測值不變，也就是 X 對預測 Y 沒有幫助。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0501", "c": "C05", "lv": 1, "d": 2, "b": 0.0, "exp": 4, "q": "相關係數 r 的範圍是多少？", "o": ["−1 到 +1", "沒有上下限", "0 到 1", "0 到 100"], "k": 0, "m": ["", "", "", ""], "ex": "r 介於 −1 和 +1 之間。正負代表方向，越接近 ±1 代表點越貼近一條直線。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0502", "c": "C05", "lv": 2, "d": 2, "b": 0.0, "exp": 4, "q": "r = −0.9 代表什麼樣的關係？", "o": ["幾乎沒有關係", "很強的負相關", "很強的正相關", "很弱的關係，因為它是負的"], "k": 1, "m": ["", "", "", "M05"], "ex": "−0.9 的絕對值很接近 1，所以很強；負號代表方向往右下。", "f": "B", "t": "相關係數與關係強弱"}, {"id": "R0503", "c": "C05", "lv": 2, "d": 2, "b": 0.0, "exp": 4, "q": "下列哪一個 r 代表的直線關係最強？", "o": ["+0.30", "−0.85", "+0.60", "0"], "k": 1, "m": ["", "", "M05", ""], "ex": "強弱看絕對值：|−0.85| = 0.85 最大。負號只代表方向。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0607", "c": "C06", "lv": 2, "d": 2, "b": 0.0, "exp": 12, "q": "散佈圖上的點完全散成一團，看不出往上或往下。r 最可能接近多少？", "o": ["0", "+0.5", "−1", "+1"], "k": 0, "m": ["", "", "", ""], "ex": "看不出方向的一團點，代表沒有直線關係，r 接近 0。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0701", "c": "C07", "lv": 1, "d": 2, "b": 0.0, "exp": 3, "q": "什麼是「外推」？", "o": ["用迴歸線去預測資料範圍以外的情況", "用迴歸線去預測資料範圍以內的情況", "增加樣本數讓預測更準", "把離群值從資料中推出去"], "k": 0, "m": ["", "", "", ""], "ex": "外推是拿迴歸線去猜「資料沒有涵蓋到的範圍」，那一段線沒有證據支撐。", "f": "", "t": "基本概念與散佈圖"}, {"id": "R0703", "c": "C07", "lv": 3, "d": 2, "b": 0.0, "exp": 3, "q": "資料中 X 的範圍是 10 到 50。下列哪一個預測最可靠？", "o": ["X = 0", "X = −20", "X = 100", "X = 30"], "k": 3, "m": ["", "", "M09", ""], "ex": "30 在資料範圍中間，有最多資料支撐。0、−20、100 都在範圍外，是外推。", "f": "B", "t": "迴歸線與預測"}, {"id": "R0704", "c": "C07", "lv": 2, "d": 2, "b": 0.0, "exp": 3, "q": "迴歸線算出的預測值 ŷ，應該怎麼理解？", "o": ["在這個 X 下，Y 最大可能的值", "在這個 X 下，Y 最小可能的值", "在這個 X 下，Y 的平均預期值", "在這個 X 下，每個人一定會得到的值"], "k": 2, "m": ["", "", "", "M10"], "ex": "預測值是平均傾向。同樣讀 4 小時的同學，分數會散布在預測值的上下。", "f": "A", "t": "基本概念與散佈圖"}, {"id": "R0706", "c": "C07", "lv": 3, "d": 2, "b": 0.0, "exp": 3, "q": "迴歸線預測「讀 5 小時的同學平均考 73 分」。小美讀了 5 小時，只考了 60 分。哪一個說法最恰當？", "o": ["迴歸線是錯的，因為小美沒有考到 73 分", "小美一定是沒有認真讀書，才會考不好", "應該把小美的資料刪掉，線才會準", "預測是平均傾向，個人落在線的下方很正常"], "k": 3, "m": ["M10", "", "M12", ""], "ex": "每個人都會有殘差。一個人低於預測，不代表線錯了，也不需要刪掉他。", "f": "", "t": "迴歸線與預測"}, {"id": "R0901", "c": "C09", "lv": 2, "d": 2, "b": 0.0, "exp": 13, "q": "「相關不等於因果」是什麼意思？", "o": ["只有 r 剛好等於 1 時，才會有因果關係", "兩個變數一起變動，不代表其中一個造成另一個", "r 越高，兩者的因果關係就越強", "兩個變數有相關，就代表兩者一定沒有因果"], "k": 1, "m": ["", "", "M01", "M02"], "ex": "相關只說「一起變動」。它可能是因果，也可能是第三個變數或方向相反造成的，需要更多證據才能分辨。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R0406", "c": "C04", "lv": 3, "d": 2, "b": 0.0, "exp": 3, "q": "一條迴歸線通過 (2, 10) 和 (6, 30) 兩點，它的斜率是多少？", "o": ["4", "20", "5", "0.2"], "k": 2, "m": ["", "", "", ""], "ex": "斜率 = Y 的變化 ÷ X 的變化 = (30 − 10) ÷ (6 − 2) = 20 ÷ 4 = 5。", "f": "", "t": "迴歸線與預測"}, {"id": "R0504", "c": "C05", "lv": 3, "d": 2, "b": 0.0, "exp": 4, "q": "下列哪一組 r，是依照「關係由弱到強」排列的？", "o": ["−0.95、−0.4、0.1、0.7", "0.1、−0.4、0.7、−0.95", "−0.4、0.1、0.7、−0.95", "0.7、0.1、−0.4、−0.95"], "k": 1, "m": ["M05", "", "", ""], "ex": "比強弱時先拿掉正負號：0.1 < 0.4 < 0.7 < 0.95。「−0.95、−0.4、0.1、0.7」只是把數字由小到大排，等於把負號當成「弱」。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0505", "c": "C05", "lv": 2, "d": 2, "b": 0.0, "exp": 4, "q": "r = +1 代表什麼？", "o": ["所有點都剛好落在一條往右上的直線上", "迴歸線的斜率一定等於 1", "X 和 Y 的數值完全相同", "兩者完美相關，X 一定是造成 Y 改變的原因"], "k": 0, "m": ["", "M04", "", "M01"], "ex": "r = +1 代表完美的正向直線關係。線可以很陡也可以很平，斜率不一定是 1；而且完美相關也不代表因果。", "f": "A", "t": "相關係數與關係強弱"}, {"id": "R0506", "c": "C05", "lv": 3, "d": 2, "b": 0.0, "exp": 4, "q": "把所有人的身高從「公分」改成「英寸」，身高與體重的 r 會怎樣？", "o": ["不變", "變大，因為單位比較精確", "變小，因為英寸的數字比較小", "變成負數"], "k": 0, "m": ["", "", "", ""], "ex": "r 沒有單位。換單位只是把所有點等比例縮放，點的排列形狀不變，r 也不變。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0509", "c": "C05", "lv": 2, "d": 2, "b": 0.0, "exp": 4, "q": "相關係數 r 的正負號，和迴歸線斜率的正負號有什麼關係？", "o": ["兩者的正負號一定相反", "兩者沒有關係，要分別判斷", "兩者的正負號一定相同", "r 一定是正的，只有斜率可正可負"], "k": 2, "m": ["", "", "", ""], "ex": "r 和斜率描述的是同一個方向：往右上兩者都正，往右下兩者都負。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0708", "c": "C07", "lv": 2, "d": 2, "b": 0.0, "exp": 3, "q": "預測的可靠程度，和預測點離「資料中心」的遠近有什麼關係？", "o": ["跟距離沒有關係，只要線畫對就好", "離資料中心越遠，預測越可靠", "只有剛好在資料中心才能預測", "離資料中心越遠，預測越不可靠"], "k": 3, "m": ["M09", "", "", ""], "ex": "資料中心附近的點最多，線在那裡最穩；越往邊緣，線的位置越不確定。", "f": "", "t": "迴歸線與預測"}, {"id": "R0802", "c": "C08", "lv": 2, "d": 2, "b": 0.0, "exp": 8, "q": "在散佈圖中加入一個「X 很大、Y 卻很小」的極端點，迴歸線最可能怎麼變？", "o": ["最小平方法會自動忽略這個極端的點", "被這個點往下拉，斜率明顯改變", "迴歸線會變成一條垂直線", "不會改變，因為只多了一個點"], "k": 1, "m": ["", "", "", "M11"], "ex": "X 很大的點位在邊緣，有很大的「槓桿」。它的 Y 很小，會把線的右端往下拉，斜率因此改變。", "f": "", "t": "離群值與模型診斷"}, {"id": "R0804", "c": "C08", "lv": 2, "d": 2, "b": 0.0, "exp": 8, "q": "發現離群值時，最恰當的處理方式是什麼？", "o": ["直接刪除，因為離群值會讓迴歸線變得不準確", "一律保留不動，因為刪掉任何資料都等於在竄改結果", "先查明它是錯誤還是真實的特殊情況，再決定怎麼處理", "把它改成平均數，它就不會影響結果了"], "k": 2, "m": ["M12", "", "", "M12"], "ex": "打錯的資料應該更正；真實的特殊情況可以保留，並說明有它、沒它的結果差多少。", "f": "B", "t": "離群值與模型診斷"}, {"id": "R0805", "c": "C08", "lv": 2, "d": 2, "b": 0.0, "exp": 8, "q": "X 值遠離其他點的資料稱為「高槓桿點」。它有什麼特色？", "o": ["它離其他點太遠，所以不會影響迴歸線", "它一定會剛好落在迴歸線上", "它有能力大幅改變迴歸線的斜率", "它一定是資料輸入錯誤的結果"], "k": 2, "m": ["M11", "", "", "M12"], "ex": "高槓桿點像蹺蹺板最外端的人，只要它的 Y 稍微偏離，就能把線撬動。", "f": "", "t": "離群值與模型診斷"}, {"id": "R0903", "c": "C09", "lv": 1, "d": 2, "b": 0.0, "exp": 13, "q": "冰淇淋與溺水例子中的「氣溫」，在統計上稱為什麼？", "o": ["解釋變數（用來預測的變數）", "離群值（偏離的觀測值）", "應變數（被預測的變數）", "混淆變數（第三個變數）"], "k": 3, "m": ["", "", "", ""], "ex": "同時影響 X 和 Y、讓兩者看起來有關的變數，叫做混淆變數。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R0905", "c": "C09", "lv": 3, "d": 2, "b": 0.0, "exp": 13, "q": "研究發現「家裡藏書越多的孩子，成績越好」。下列哪一個最可能是混淆變數？", "o": ["家裡的藏書數量", "家庭的社經背景", "考試當天的天氣", "孩子的考試成績"], "k": 1, "m": ["M18", "", "", "M18"], "ex": "社經背景較好的家庭，可能買得起更多書，也提供更多學習資源。藏書和成績是 X 和 Y 本身，不是第三個變數。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R0907", "c": "C09", "lv": 1, "d": 2, "b": 0.0, "exp": 13, "q": "明明是「Y 影響 X」，卻被解讀成「X 影響 Y」，這種情況稱為什麼？", "o": ["辛普森悖論", "外推", "反向因果", "選擇偏誤"], "k": 2, "m": ["", "", "", ""], "ex": "把因果方向弄反，叫做反向因果。迴歸線本身看不出方向。", "f": "A", "t": "因果與混淆陷阱"}, {"id": "R0908", "c": "C09", "lv": 4, "d": 2, "b": 0.0, "exp": 13, "q": "調查發現「常去醫院的人，健康狀況比較差」。有人說「去醫院會讓人變不健康」。哪一個說法最能指出問題？", "o": ["可能是身體不好的人才常去醫院，方向可能相反", "相關研究沒有用，這種觀察資料不應該拿來討論", "去醫院次數是 X、健康是 Y，所以去醫院就是原因", "樣本太小，只要多收資料就能證明因果"], "k": 0, "m": ["", "M02", "M03", "M14"], "ex": "這是典型的反向因果：健康差 → 常去醫院。相關資料仍然有用，但要想清楚方向。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R0909", "c": "C09", "lv": 3, "d": 2, "b": 0.0, "exp": 13, "q": "要確定 X 真的會「造成」Y，哪一種研究方法最有說服力？", "o": ["蒐集更多觀察資料，讓 r 更接近 1", "畫一張更清楚的散佈圖", "換成更大的樣本，再算一次 r", "隨機分派的實驗"], "k": 3, "m": ["M01", "", "M14", ""], "ex": "隨機分派讓兩組在其他條件上平均相同，唯一的差別就是 X，這樣才能把 Y 的差異歸因於 X。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R1101", "c": "C11", "lv": 3, "d": 2, "b": 0.0, "exp": 7, "q": "只挑歐洲國家來研究房價與生育率，最可能造成什麼問題？", "o": ["樣本變少，所以結論一定更準確", "選擇偏誤：結論不一定適用於其他地區", "外推：歐洲國家的房價都超出了資料範圍", "r 一定會從正的變成負的"], "k": 1, "m": ["M14", "", "", ""], "ex": "只挑某一類國家，樣本就無法代表全部。在歐洲成立的關係，換到亞洲可能完全不同。", "f": "A", "t": "因果與混淆陷阱"}, {"id": "R1103", "c": "C11", "lv": 2, "d": 2, "b": 0.0, "exp": 7, "q": "樣本很小（例如只有 10 筆）時，重新抽樣算出的 r 通常會怎樣？", "o": ["每次都差不多，因為來自同一群人", "會慢慢變成 0", "會慢慢變成 1", "每次可能差很多，很不穩定"], "k": 3, "m": ["M15", "", "", ""], "ex": "樣本越小，抽到誰的運氣成分越大，r 的波動也越大。", "f": "B", "t": "相關係數與關係強弱"}, {"id": "R1201", "c": "C12", "lv": 2, "d": 2, "b": 0.0, "exp": 6, "q": "研究用「實質房價」而不是「名目房價」，主要是為了什麼？", "o": ["各國的名目房價資料都查不到", "兩種都可以，只是換個名稱而已", "實質房價的數字比較大，差異比較明顯", "扣掉物價上漲的影響，才能公平比較"], "k": 3, "m": ["", "M17", "", ""], "ex": "20 年間物價本身就會上漲。用實質房價，看的是「扣掉通膨後，房子真的貴了多少」。", "f": "A", "t": "基本概念與散佈圖"}, {"id": "R0304", "c": "C03", "lv": 1, "d": 2, "b": 0.0, "exp": 1, "q": "最小平方法找出的迴歸線，是讓什麼東西最小？", "o": ["所有殘差平方之後加起來的總和", "線上方與線下方的點數差距", "所有殘差不取平方、直接加起來的總和", "每個點到原點的距離總和"], "k": 0, "m": ["", "M08", "", ""], "ex": "最小平方法讓「殘差平方和」最小。殘差直接相加會正負抵銷；上下點數一樣多也不是它的標準。", "f": "", "t": "迴歸線與預測"}, {"id": "R0306", "c": "C03", "lv": 4, "d": 2, "b": 0.0, "exp": 1, "q": "三位同學各畫了一條他覺得最能代表散佈圖的直線：甲讓線上下的點數一樣多；乙讓線穿過最多的點；丙讓每個點到線的垂直距離平方和最小。哪一條才是迴歸線？", "o": ["丙的線，因為它讓垂直距離的平方和最小", "乙的線，因為穿過越多點就代表越準", "甲的線，因為上下的點一樣多才平衡", "三條都算，因為迴歸線本來就可以有很多條"], "k": 0, "m": ["", "M08", "M08", ""], "ex": "研究發現很多人直覺用「上下平分」或「穿過最多點」來畫線，但迴歸線的標準是讓垂直距離平方和最小，它可能一個點都沒有穿過。", "f": "A", "t": "迴歸線與預測"}, {"id": "R1208", "c": "C12", "lv": 3, "d": 2, "b": 0.0, "exp": 14, "q": "台灣總生育率在 2010 年（虎年）和 2012 年（龍年）出現大幅波動。研究因此用「三年平均」當起點和終點，原因是什麼？", "o": ["避免單一年份的文化因素（生肖）干擾比較", "三年平均的數字比較大，國家間的差異比較明顯", "這兩年的資料有錯，應該直接刪掉", "生肖會先影響房價，再影響生育率"], "k": 0, "m": ["", "", "M12", ""], "ex": "2010 虎年特別低、2012 龍年特別高，只看某一年容易誤判。取三年平均可以把這種短期波動抹平。", "f": "B", "t": "離群值與模型診斷"}, {"id": "R0204", "c": "C02", "lv": 4, "d": 2, "b": 0.0, "exp": 12, "q": "散佈圖上的點呈現明顯的「倒 U 形」：先上升、後下降。如果硬畫一條直線，最可能發生什麼？", "o": ["r 會接近 +1，因為這些點排列得非常整齊", "r 會接近 0，所以可以確定兩者之間沒有任何關係", "直線仍然適用，因為最小平方法可以處理任何形狀", "直線描述不了先升後降，r 可能接近 0 而低估關係"], "k": 3, "m": ["", "M06", "", ""], "ex": "倒 U 形的左半邊往上、右半邊往下，直線會把兩段抵銷，r 可能接近 0。但兩者其實有很清楚的關係，只是不是直線。", "f": "", "t": "離群值與模型診斷"}, {"id": "R0206", "c": "C02", "lv": 4, "d": 2, "b": 0.0, "exp": 9, "q": "老師把 40 位同學的「手遊時數」和「數學成績」畫成散佈圖，發現有兩團點：一團在左上、一團在右下，每一團內部都看不出方向。哪一個解讀最恰當？", "o": ["兩團內部都沒有方向，所以整體的 r 也會接近 0", "玩手遊會讓數學成績變差，而且從圖上看兩者的關係很強", "整體像負相關，但可能是兩種學生混在一起，要先弄清楚怎麼分組", "應該刪掉其中一團，只分析人數比較多、比較有代表性的那一團"], "k": 2, "m": ["M13", "M01", "", "M12"], "ex": "每一團內部都沒有趨勢，整體的負相關是「兩群學生位置不同」造成的。先找出是什麼把他們分成兩團（例如年級、班別），才能下結論。", "f": "", "t": "離群值與模型診斷"}, {"id": "R0305", "c": "C03", "lv": 2, "d": 2, "b": 0.0, "exp": 1, "q": "為什麼最小平方法要把殘差「平方」之後再加總？", "o": ["這只是一種習慣，其實直接相加得到的線也完全一樣", "平方之後數字會變小，電腦計算起來比較快", "上方的正殘差和下方的負殘差會抵銷，平方後就不會", "平方之後，迴歸線一定會剛好通過原點"], "k": 2, "m": ["", "", "", ""], "ex": "有正有負的殘差直接相加會互相抵銷，無法反映線離點有多遠。平方後全部變成正的，才能公平比較。", "f": "", "t": "迴歸線與預測"}, {"id": "R0308", "c": "C03", "lv": 2, "d": 2, "b": 0.0, "exp": 8, "q": "對於離迴歸線很遠的點，「平方」這個做法會帶來什麼影響？", "o": ["迴歸線會被這些點強制拉成一條水平線", "最小平方法會自動找出這些點並把它們排除", "它們的誤差被縮小，所以幾乎不會影響到迴歸線", "它們的誤差被放大，對迴歸線位置的影響特別大"], "k": 3, "m": ["", "", "M11", ""], "ex": "距離 10 平方後是 100，距離 2 平方後只有 4。平方把大誤差放得更大，所以遠離的點特別能拉動迴歸線。", "f": "B", "t": "迴歸線與預測"}, {"id": "R0309", "c": "C03", "lv": 1, "d": 2, "b": 0.0, "exp": 1, "q": "用最小平方法算出的迴歸線（有截距），所有殘差「直接相加」會等於多少？", "o": ["每份資料都不一樣，沒有辦法確定", "殘差平方和", "0", "資料的筆數 n"], "k": 2, "m": ["", "", "", ""], "ex": "有截距的最小平方迴歸線，會讓線上方和下方的殘差剛好抵銷，加總一定是 0。這也是為什麼衡量誤差要先平方。", "f": "", "t": "迴歸線與預測"}, {"id": "R0407", "c": "C04", "lv": 4, "d": 2, "b": 0.0, "exp": 4, "q": "某研究用「身高（公分）」預測「體重（公斤）」，斜率是 0.5。如果改用「公尺」量身高、體重不變，會發生什麼事？", "o": ["斜率變成 0.005，r 維持不變", "斜率還是 0.5，因為兩者的關係沒有改變", "斜率變成 50，但相關係數 r 不變", "斜率和 r 都會變成原本的 100 倍"], "k": 2, "m": ["", "", "", "M04"], "ex": "1 公尺 = 100 公分，所以「每公尺」的變化是「每公分」的 100 倍，斜率變 50。r 沒有單位，換單位不會改變。", "f": "", "t": "迴歸線與預測"}, {"id": "R0408", "c": "C04", "lv": 4, "d": 2, "b": 0.0, "exp": 4, "q": "甲研究的迴歸線斜率是 2.5，乙研究的斜率是 0.3，兩份研究的 X、Y 單位都不一樣。哪一個判斷最恰當？", "o": ["甲研究的關係比較強，因為它的斜率大了好幾倍", "只比較斜率，無法判斷哪一份的關係比較強，要看 r", "甲研究的關係可以說是因果，乙研究則不行", "乙研究的關係比較強，因為斜率小代表資料比較穩定"], "k": 1, "m": ["M04", "", "M01", ""], "ex": "斜率大小會隨單位改變，只能說「X 多 1 單位，Y 平均變多少」。兩者關係有多緊密，要看 r 的絕對值。", "f": "B", "t": "迴歸線與預測"}, {"id": "R0409", "c": "C04", "lv": 3, "d": 2, "b": 0.0, "exp": 3, "q": "迴歸線「預測體重 ＝ −50 ＋ 0.7 × 身高（公分）」的截距是 −50，資料中的身高介於 150 到 185 公分。這個截距該怎麼看？", "o": ["截距比斜率更重要，應該優先拿來解讀", "身高 0 公分遠在資料範圍外，這個截距沒有實際意義", "代表身高 0 公分的人，預測體重就是 −50 公斤", "模型設定錯了，因為截距不可能是負數"], "k": 1, "m": ["", "", "M09", ""], "ex": "截距是 X = 0 時的預測值。身高 0 公分完全不在資料裡，所以 −50 只是讓線落在正確位置的數學結果，不需要有現實意義。", "f": "A", "t": "迴歸線與預測"}, {"id": "R0507", "c": "C05", "lv": 2, "d": 2, "b": 0.0, "exp": 4, "q": "原本用身高預測體重，改成用體重預測身高。下列哪一個「會」改變？", "o": ["相關係數 r 的正負號", "相關係數 r 的大小", "兩者都不會改變", "迴歸線的斜率"], "k": 3, "m": ["", "", "", ""], "ex": "r 是對稱的，X、Y 對調也一樣；但迴歸線是「用 X 猜 Y」，對調之後猜的方向不同，斜率會改變。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0508", "c": "C05", "lv": 4, "d": 2, "b": 0.0, "exp": 4, "q": "一份研究算出兩個變數的 r = +0.04。記者寫：「兩者有微弱的正向關係」。這個說法最大的問題是什麼？", "o": ["r = 0.04 的意思是兩者有 4% 的機率相關", "r 接近 0，代表這兩個變數之間完全沒有任何關係", "r 這麼接近 0，比較恰當的說法是「看不出直線關係」", "沒有問題，r 是正的就代表有正向關係"], "k": 2, "m": ["", "M06", "", ""], "ex": "0.04 幾乎等於 0，說「微弱正向關係」會誤導讀者。但 r 接近 0 只代表沒有直線關係，不能說完全沒有任何關係。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0602", "c": "C06", "lv": 2, "d": 2, "b": 0.0, "exp": 12, "q": "「安斯庫姆四重奏」中，四組資料的 r 都是 +0.816。這告訴我們什麼？", "o": ["r 超過 0.8，就代表兩個變數之間有因果", "r 一樣代表算錯了，四組不可能完全相同", "四組資料的散佈圖一定長得差不多", "r 相同，資料的形狀可能完全不同"], "k": 3, "m": ["M01", "", "M07", ""], "ex": "四組資料的平均數、r、迴歸線都幾乎一樣，但一組是直線、一組是曲線、兩組被單一的點左右。這就是「先看圖」的經典例子。", "f": "A", "t": "離群值與模型診斷"}, {"id": "R0603", "c": "C06", "lv": 4, "d": 2, "b": 0.0, "exp": 12, "q": "一組資料的 r = 0.02，但散佈圖是很清楚的 U 形曲線。哪一個結論最恰當？", "o": ["兩者有很明顯的關係，只是不是直線關係", "資料一定有錯，應該重新蒐集", "應該刪掉 U 形底部的點，讓 r 變大", "兩者沒有任何關係，因為 r 接近 0"], "k": 0, "m": ["", "", "M12", "M06"], "ex": "U 形代表 X 改變時 Y 有很規律的變化，只是先降後升。r 只量直線關係，所以會接近 0。", "f": "", "t": "離群值與模型診斷"}, {"id": "R0803", "c": "C08", "lv": 4, "d": 2, "b": 0.0, "exp": 8, "q": "14 個人的兩個變數原本 r = 0.01。加入第 15 個人，他的兩個數值都遠大於其他人，r 變成 0.8。哪一個判斷最恰當？", "o": ["一個人只佔 7%，對 r 的影響應該很小", "樣本從 14 人變成 15 人，所以新的 r = 0.8 比較可信", "這個強相關幾乎是那一個人撐出來的，不能代表其他 14 人", "原本 14 人的資料一定有錯，才會 r = 0.01"], "k": 2, "m": ["M11", "M14", "", ""], "ex": "其他 14 人之間完全沒有關係，是那一個極端的人讓整條線變陡。報告 r 時要說明它是不是由少數點決定的。", "f": "", "t": "離群值與模型診斷"}, {"id": "R0906", "c": "C09", "lv": 4, "d": 2, "b": 0.0, "exp": 13, "q": "「消防車出動越多的火災，損失越大」，於是有人主張以後少派一點車。這個推論錯在哪裡？", "o": ["沒有錯，資料確實顯示派越多車損失越大", "應該改派比較大台的消防車，而不是減少數量", "火災的規模同時決定了派車數量和損失大小", "消防車太多會互相妨礙，所以真的會增加損失"], "k": 2, "m": ["M01", "", "", "M01"], "ex": "大火才會派很多車，大火也會造成大損失。火災規模是混淆變數；少派車反而可能讓損失更大。", "f": "B", "t": "因果與混淆陷阱"}, {"id": "R1001", "c": "C10", "lv": 1, "d": 2, "b": 0.0, "exp": 9, "q": "什麼是辛普森悖論？", "o": ["不論資料長怎樣，迴歸線都一定會通過原點", "整體資料的趨勢，分組之後可能完全相反", "只要有離群值，r 就一定會變大", "樣本越大，r 就越接近 0"], "k": 1, "m": ["", "", "", ""], "ex": "混在一起看和分組看，趨勢方向可能相反，而且兩邊都沒有算錯。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R1002", "c": "C10", "lv": 4, "d": 2, "b": 0.0, "exp": 9, "q": "全班看起來「補習越多，模擬考越低」，但按基礎班、精英班分開看，兩班都是「補越多考越好」。最可能的原因是什麼？", "o": ["兩班的人數不一樣多，所以分組後的結果不能相信", "補習真的會讓成績變差，分組看到的只是錯覺", "整體的 r 算反了，應該是正相關才對", "基礎班的學生本來分數就比較低，也補得比較多"], "k": 3, "m": ["", "M13", "", ""], "ex": "「班別」同時影響補習時數和分數。混在一起時，基礎班（補多、分數低）把整體拉成負相關。", "f": "B", "t": "因果與混淆陷阱"}, {"id": "R1005", "c": "C10", "lv": 4, "d": 2, "b": 0.0, "exp": 10, "q": "「小鎮通勤族」和「大城通勤族」各自的通勤時間與滿意度都沒有關係，但混在一起時出現很強的負相關；只調整兩群在樣本中的比例，r 就跟著變。這說明什麼？", "o": ["只要總人數夠多，各群在樣本中的比例就不重要", "把兩群混在一起算出的 r，才是兩者真正的關係", "樣本裡各群的組成比例，就能製造或改變整體的相關", "兩群各自沒關係，混在一起也一定沒關係"], "k": 2, "m": ["M14", "M13", "", "M13"], "ex": "兩群的平均位置不同，混在一起就會出現「群與群之間」的趨勢。改變比例，就能讓這個假趨勢變強或變弱。", "f": "A", "t": "因果與混淆陷阱"}, {"id": "R1105", "c": "C11", "lv": 4, "d": 2, "b": 0.0, "exp": 11, "q": "8 個人之間原本有很強的關係（r = 0.98），和另外 150 個沒有關係的人混在一起分析後，整體 r 接近 0。哪一個解讀最恰當？", "o": ["那 8 個人的關係是假的，因為放進整體後就沒有關係了", "少數群體的真實訊號被多數稀釋了，整體才看不出來", "樣本變大了，所以整體的結果比較可信", "少數群體每個人的權重比較高，訊號會被放大"], "k": 1, "m": ["M16", "", "M14", "M16"], "ex": "那 8 個人的關係從頭到尾都沒變，只是人數懸殊，被 150 人的雜訊平均掉了。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R1108", "c": "C11", "lv": 4, "d": 2, "b": 0.0, "exp": 7, "q": "研究者測試了 20 個變數和生育率的關係，最後只報告了 r 最高的那一個。最需要擔心什麼？", "o": ["r 最高的那一個變數，就是生育率下降的主要原因", "試得越多，光靠巧合也可能出現看起來很強的關係", "沒有問題，挑最高的那一個最有代表性", "其他 19 個變數的資料一定都有錯"], "k": 1, "m": ["M01", "", "", ""], "ex": "每多試一個變數，就多一次「碰巧看起來很強」的機會。只報告最好的那一個，會高估關係。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R0911", "c": "C09", "lv": 4, "d": 2, "b": 0.0, "exp": 13, "q": "甲國房價漲很多、生育率也跌很多；但乙國房價幾乎沒漲，生育率同樣跌很多。這個對照最能說明什麼？", "o": ["乙國是離群值，所以整個關於房價的結論都不能成立", "甲國的資料一定有誤，應該把甲國整個刪除再分析", "房價上漲不是生育率下降的唯一原因，單一國家的巧合不能證明因果", "房價與生育率完全無關，所以可以完全排除房價的影響"], "k": 2, "m": ["", "M12", "", "M02"], "ex": "只看一兩個國家，既不能證明、也不能完全排除，得看多國資料並考慮其他因素。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R0311", "c": "C03", "lv": 1, "d": 2, "b": 0.0, "exp": 1, "q": "殘差圖（橫軸是預測值、縱軸是殘差）中，殘差呈現明顯的「U 字形」曲線。這最可能代表什麼？", "o": ["直線模型沒抓到彎曲的關係，可考慮加入平方項", "樣本數太大，需要刪掉一半的資料再重新畫圖", "資料裡剛好有一個離群值，把它刪掉就會恢復正常", "模型配適得非常完美，所以殘差才會出現規則的形狀"], "k": 0, "m": ["", "", "M12", ""], "ex": "好的殘差圖應該是隨機散布、看不出規律。出現曲線代表模型形式（直線）不對。", "f": "", "t": "離群值與模型診斷"}, {"id": "R0312", "c": "C03", "lv": 1, "d": 2, "b": 0.0, "exp": 1, "q": "殘差圖中，X 越大，殘差上下散開的幅度越大，整體像一支喇叭。這最可能代表什麼？", "o": ["殘差越大，代表模型在該處預測得越準確", "X 與 Y 之間完全沒有關係，所以殘差才會亂散", "誤差的變異不固定（異質變異），可考慮對 Y 取對數", "資料裡一定有大量缺失值，造成殘差上下不平均"], "k": 2, "m": ["", "", "", ""], "ex": "最小平方法假設各處的誤差大小差不多。喇叭形代表違反這個假設，標準誤與檢定結果可能失真。", "f": "", "t": "離群值與模型診斷"}, {"id": "R0411", "c": "C04", "lv": 2, "d": 2, "b": 0.0, "exp": 3, "q": "已知身高與體重的相關係數 r = 0.6，身高的標準差為 10 公分、體重的標準差為 20 公斤。以身高預測體重的迴歸斜率是多少？", "o": ["0.3", "0.6", "1.2", "2.0"], "k": 2, "m": ["", "M04", "", ""], "ex": "斜率 = r × (Y 的標準差 ÷ X 的標準差) = 0.6 × 20 ÷ 10 = 1.2。0.3 是把標準差的比值上下顛倒的結果。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0711", "c": "C07", "lv": 3, "d": 2, "b": 0.0, "exp": 3, "q": "「父母身高特別高的孩子，平均來說會比父母矮一點，但仍高於全體平均」。最適合用什麼來解釋這個現象？", "o": ["迴歸效應：相關小於 1 時，極端值的平均預測會比較靠近整體平均", "特別高的父母是離群值，應該先刪掉再重新分析", "身高和遺傳完全無關，孩子的身高純屬隨機，高低都不意外", "高個子的基因會一代一代衰退，所以孩子一定比父母矮"], "k": 0, "m": ["", "M12", "", ""], "ex": "只要 r 小於 1，X 很極端時 Y 的預測值就會「不那麼極端」。這是統計現象，不代表基因衰退，也不是資料有問題。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R0412", "c": "C04", "lv": 2, "d": 2, "b": 0.0, "exp": 3, "q": "某研究得到 ln(月薪) = 10.2 + 0.05 × 年資。對這個式子最恰當的解讀是？", "o": ["年資每多 1 年，月薪平均增加 5 元", "年資每多 1 年，月薪平均約增加 5%", "年資每多 1 年，月薪平均增加 0.05 元", "年資和月薪的相關係數是 0.05"], "k": 1, "m": ["", "", "", ""], "ex": "Y 取自然對數後，斜率（在數值小時）近似「百分比變化」，0.05 約等於每年增加 5%。", "f": "", "t": "迴歸線與預測"}, {"id": "R0609", "c": "C06", "lv": 2, "d": 2, "b": 0.0, "exp": 12, "q": "X 增加時 Y 一定增加，但增加得越來越快（例如 y = 2 的 x 次方）。Pearson 相關係數 r 與 Spearman 等級相關會怎樣？", "o": ["Spearman 等於 1，Pearson 的 r 小於 1", "Pearson 的 r 等於 1，Spearman 小於 1", "兩者都剛好等於 1", "兩者都接近 0"], "k": 0, "m": ["", "", "", ""], "ex": "Spearman 只看大小順序，單調關係就是 1；Pearson 衡量「直線」關係，彎曲的單調關係會小於 1。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0313", "c": "C03", "lv": 1, "d": 2, "b": 0.0, "exp": 1, "q": "10 個資料點，用 9 次多項式可以剛好通過每一個點（訓練誤差為 0）。這通常不是好模型，主要原因是？", "o": ["它連雜訊也一起學進去，對新資料的預測往往很差", "曲線不可能通過所有資料點，所以這個結果一定是算錯的", "9 次多項式在數學上根本算不出來，所以不能使用", "誤差為 0 就代表資料一定有輸入錯誤，應該重新蒐集"], "k": 0, "m": ["", "", "", ""], "ex": "模型太複雜會過度配適（overfitting）：訓練資料漂亮，但抓到的是雜訊而不是規律，換一批資料就不準。", "f": "", "t": "離群值與模型診斷"}, {"id": "R1209", "c": "C12", "lv": 3, "d": 2, "b": 0.0, "exp": 14, "q": "如果自變數 X 帶有隨機的測量誤差（例如問卷自填的運動時數不準），其他條件不變，估計出的迴歸斜率通常會怎樣？", "o": ["一定變成負的", "完全不受影響", "偏向 0，也就是被低估", "被高估"], "k": 2, "m": ["", "", "", ""], "ex": "X 的隨機誤差會稀釋 X 與 Y 的關係，使斜率往 0 靠攏，稱為衰減偏誤（迴歸稀釋）。", "f": "", "t": "離群值與模型診斷"}, {"id": "R0413", "c": "C04", "lv": 2, "d": 2, "b": 0.0, "exp": 3, "q": "同時把「身高（公分）」和「身高（英寸）」放進複迴歸去預測體重，會有什麼問題？", "o": ["兩個變數的斜率都會自動變成原本的一半，其他不變", "殘差會全部變成負數，使預測結果系統性偏低", "模型會變得更準確，因為兩個變數可以互相驗證", "兩者資訊重複（共線性），個別係數無法唯一決定、也無法解讀"], "k": 3, "m": ["", "", "", ""], "ex": "解釋變數之間高度相關（共線性）時，預測也許還行，但各變數的係數不穩定，無法判斷「單獨」的影響。", "f": "", "t": "離群值與模型診斷"}, {"id": "R1006", "c": "C10", "lv": 3, "d": 2, "b": 0.0, "exp": 9, "q": "複迴歸中，『廣告費』對『銷量』的影響在旺季明顯比淡季大。要在模型中表現這件事，最直接的做法是？", "o": ["改用相關係數取代迴歸，就能分開旺季與淡季", "改成每個月各自算一次相關係數，不放進同一個模型", "加入「廣告費 × 季節」的交互作用項", "把廣告費取平均，再用平均值去預測銷量"], "k": 2, "m": ["", "", "", ""], "ex": "當一個變數的效果會隨另一個變數而改變，就是交互作用，要把兩者的乘積項放進模型。", "f": "", "t": "離群值與模型診斷"}, {"id": "R0912", "c": "C09", "lv": 4, "d": 2, "b": 0.0, "exp": 13, "q": "真實情況是：氣溫同時影響冰淇淋銷量與溺水人數，冰淇淋本身並不影響溺水。若只用冰淇淋銷量去預測溺水人數（模型沒放氣溫），冰淇淋的斜率會？", "o": ["被高估，呈現明顯的正值（遺漏變數偏誤）", "剛好等於 0", "變成負值", "不受影響，因為迴歸會自動扣除第三個變數"], "k": 0, "m": ["", "", "", ""], "ex": "遺漏了和 X、Y 都有關的變數，它的效果會被算到 X 頭上。把氣溫放進模型後，冰淇淋的斜率才會回到接近 0。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R1007", "c": "C10", "lv": 3, "d": 2, "b": 0.0, "exp": 9, "q": "各縣市的平均所得越低，犯罪率越高。能不能據此斷定「個別低所得的人比較會犯罪」？", "o": ["能，因為縣市是由許多個人組成的，結論一定相同", "能，只要縣市層級的相關係數夠高就可以", "不能，因為縣市的資料根本不能拿來做迴歸分析", "不能，縣市層級的相關不一定適用於個人（生態謬誤）"], "k": 3, "m": ["M13", "M13", "", ""], "ex": "群體層級的關係不等於個體層級的關係；把前者硬套到個人身上，就是生態謬誤。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R0314", "c": "C03", "lv": 1, "d": 2, "b": 0.0, "exp": 1, "q": "在迴歸中使用 Ridge 或 LASSO（正則化）的主要目的是？", "o": ["讓訓練資料上的誤差降到最小可能的值", "自動證明變數之間的因果關係是否成立", "對係數大小加上懲罰，縮小係數，降低過度配適", "把類別變數轉換成數字，讓模型可以計算"], "k": 2, "m": ["", "", "", ""], "ex": "正則化用少量偏誤換取較低變異。Ridge 把係數往 0 縮小，LASSO 還可能把部分係數壓成剛好 0，兼具變數選擇。", "f": "", "t": "離群值與模型診斷"}, {"id": "R0315", "c": "C03", "lv": 1, "d": 2, "b": 0.0, "exp": 1, "q": "線性迴歸的「常態性假設」，指的是哪一個東西應該近似常態分布？", "o": ["自變數 X", "迴歸係數的個數", "應變數 Y 的原始資料", "誤差項（可用殘差檢查）"], "k": 3, "m": ["", "", "", ""], "ex": "假設的是誤差項近似常態；X 與 Y 本身（邊際分布）不必是常態。", "f": "", "t": "離群值與模型診斷"}, {"id": "R0712", "c": "C07", "lv": 3, "d": 2, "b": 0.0, "exp": 3, "q": "用迴歸線預測 X = 5 時：甲是「所有 X = 5 的人的平均 Y」，乙是「某一位 X = 5 的人的 Y」。哪一個的不確定性比較大？", "o": ["兩者一樣大", "乙，因為還要加上個人本身的隨機變動", "甲，因為是平均所以比較不準", "無法比較"], "k": 1, "m": ["M10", "", "", ""], "ex": "預測個別值的區間（預測區間）永遠比估計平均值的區間（信賴區間）寬，因為多了個別差異。", "f": "", "t": "迴歸線與預測"}, {"id": "R0806", "c": "C08", "lv": 2, "d": 2, "b": 0.0, "exp": 8, "q": "一個 X 值遠離其他點（高槓桿）的資料，剛好落在其餘點的趨勢線上。把它刪掉，結果最可能是？", "o": ["刪掉之後，相關係數 r 反而會變大", "斜率幾乎不變，但相關係數 r 會變小", "迴歸斜率一定會大幅改變，因為它離其他點很遠", "斜率和 r 兩者都會完全不變，因為這個點很正常"], "k": 1, "m": ["", "", "", ""], "ex": "高槓桿不等於有影響力。這個點順著趨勢，不改變斜率，卻拉長了 X 的範圍、讓整體 r 看起來更高。", "f": "", "t": "離群值與模型診斷"}, {"id": "R1210", "c": "C12", "lv": 3, "d": 2, "b": 0.0, "exp": 14, "q": "用「變化量 = 期末 − 期初」去對「期初」做迴歸。即使期初與期末完全獨立，相關係數 r 也會是負的。為什麼？", "o": ["樣本數一定太小，才會出現這種假象", "高起點本身真的會導致往後下降", "期初越高的人，期末就一定越低，因此相關為負", "期初同時出現在 X 與 Y 的算式裡，造成數學上的連動"], "k": 3, "m": ["", "M01", "", ""], "ex": "變化量裡含有 −期初。期初大時，變化量就容易偏小，這是算式造成的假負相關，不代表高起點「造成」下降。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R1109", "c": "C11", "lv": 3, "d": 2, "b": 0.0, "exp": 7, "q": "某大學只錄取「入學考分數高」或「面試分數高」的學生。只分析已錄取學生，常會發現入學考與面試分數呈負相關。最合理的解釋是？", "o": ["以兩者的共同結果（被錄取）篩選，製造出假的負相關", "面試的壓力會降低一個人原本的入學考成績", "資料量太少，所以得到的結果只是隨機巧合", "入學考成績高的人，面試表現一定比較差"], "k": 0, "m": ["", "M01", "", "M01"], "ex": "兩個互不相關的因素都能讓人被錄取時，只看被錄取者，一個偏低的人必然另一個偏高，於是出現假負相關。", "f": "", "t": "因果與混淆陷阱"}, {"id": "R0513", "c": "C05", "lv": 2, "d": 2, "b": 0.0, "exp": 4, "q": "以 X 預測 Y 的迴歸斜率是 1.2，以 Y 預測 X 的迴歸斜率是 0.2（兩者皆為正）。X 與 Y 的相關係數 r 約為多少？", "o": ["0.24", "0.49", "0.70", "1.40"], "k": 1, "m": ["", "", "", ""], "ex": "兩條迴歸線斜率的乘積等於 r 的平方，所以 r = √(1.2 × 0.2) = √0.24 ≈ 0.49。", "f": "", "t": "相關係數與關係強弱"}, {"id": "R0316", "c": "C03", "lv": 1, "d": 2, "b": 0.0, "exp": 1, "q": "在複迴歸中加入一個和 Y 完全無關的新變數，用最小平方法擬合後，訓練資料上的殘差平方和會怎樣？", "o": ["一定會變成 0，因為模型變得更複雜了", "一定會變大，因為多了一個無用的變數干擾", "一定維持不變，因為這個變數與 Y 無關", "不會變大，通常會略為變小"], "k": 3, "m": ["", "", "", ""], "ex": "多一個變數，模型至少能把它的係數設成 0 而回到原本的結果，所以訓練誤差只會變小或持平。這也是不能只看訓練誤差來挑模型的原因。", "f": "", "t": "離群值與模型診斷"}], "forms": {"A": ["R0101", "R0205", "R0306", "R0409", "R0505", "R0602", "R0704", "R0801", "R0907", "R1005", "R1101", "R1201"], "B": ["R0102", "R0201", "R0308", "R0408", "R0502", "R0608", "R0703", "R0804", "R0906", "R1002", "R1103", "R1208"]}, "concepts": [{"c": "C01", "n": "迴歸在做什麼", "exp": 1}, {"c": "C02", "n": "讀散佈圖", "exp": 2}, {"c": "C03", "n": "最佳直線與殘差", "exp": 1}, {"c": "C04", "n": "斜率與截距", "exp": 3}, {"c": "C05", "n": "相關係數 r", "exp": 4}, {"c": "C06", "n": "先看圖再看 r", "exp": 12}, {"c": "C07", "n": "預測與外推", "exp": 3}, {"c": "C08", "n": "離群值與影響點", "exp": 8}, {"c": "C09", "n": "相關與因果", "exp": 13}, {"c": "C10", "n": "分組與辛普森悖論", "exp": 9}, {"c": "C11", "n": "抽樣與樣本代表性", "exp": 7}, {"c": "C12", "n": "指標怎麼定義", "exp": 14}], "mis": [{"m": "M01", "n": "相關就是因果", "belief": "兩件事一起變動，就是其中一件造成另一件。", "fix": "一起變動可能來自第三個變數、方向相反，或只是巧合。要談因果，需要實驗或其他證據。", "exp": 13}, {"m": "M02", "n": "相關就不可能是因果", "belief": "「相關不等於因果」代表相關研究沒有價值，兩者一定沒有因果。", "fix": "相關不能單獨證明因果，但也沒有排除因果。它是提出假設的起點。", "exp": 13}, {"m": "M03", "n": "忽略因果方向", "belief": "放在 X 的就是原因，放在 Y 的就是結果。", "fix": "Y 也可能反過來影響 X（反向因果）。迴歸線本身看不出誰影響誰。", "exp": 13}, {"m": "M04", "n": "線越陡、關係越強", "belief": "斜率越大，兩個變數的關係就越強。", "fix": "斜率會隨單位改變。關係強不強，要看點貼不貼近直線，也就是 r 的絕對值。", "exp": 4}, {"m": "M05", "n": "負的就是弱", "belief": "r 是負的，代表關係弱或沒有關係。", "fix": "正負號只代表方向，強弱看絕對值。r = −0.9 和 +0.9 一樣強。", "exp": 4}, {"m": "M06", "n": "r 接近 0 就完全無關", "belief": "r 接近 0，兩者就沒有任何關係。", "fix": "r 只量「直線」關係。先升後降的曲線關係，r 也可能接近 0。", "exp": 12}, {"m": "M07", "n": "只看數字不看圖", "belief": "知道 r 就夠了，散佈圖可有可無。", "fix": "同一個 r 可以對應形狀完全不同的圖。先畫散佈圖，才知道 r 能不能信。", "exp": 12}, {"m": "M08", "n": "最佳線要穿過最多點", "belief": "最好的線要穿過最多點，或讓線上下的點一樣多。", "fix": "迴歸線是讓每個點到線的垂直距離平方和最小的那條線，可能一個點都沒穿過。", "exp": 1}, {"m": "M09", "n": "線可以無限延伸", "belief": "公式算得出來，代入任何 X 都能預測。", "fix": "只有資料涵蓋的範圍內才有證據。超出範圍去預測（外推）可能完全失準。", "exp": 3}, {"m": "M10", "n": "預測值就是每個人的結果", "belief": "迴歸線的預測值，就是每個人一定會得到的數字。", "fix": "預測值是平均傾向。個人落在線的上方或下方，是正常的誤差。", "exp": 3}, {"m": "M11", "n": "一個點影響不大", "belief": "資料那麼多，一個極端的點改變不了結論。", "fix": "最小平方法會放大遠離的點。一個點就可能把 r 拉高、壓低，甚至翻號。", "exp": 8}, {"m": "M12", "n": "不合意的資料就刪掉", "belief": "離群值或不符合預期的點，直接刪掉就好。", "fix": "先查明是錯誤還是真實的特殊情況。隨意刪資料，等於替結論挑證據。", "exp": 8}, {"m": "M13", "n": "整體趨勢等於各組趨勢", "belief": "整體看到的趨勢，每一組也都一樣。", "fix": "混在一起看和分組看，方向可能相反（辛普森悖論）。要先找出分組變數。", "exp": 9}, {"m": "M14", "n": "樣本大就可靠", "belief": "人數夠多，結果就能代表全體，甚至證明因果。", "fix": "樣本怎麼挑比有多大更重要。只收特定的人或自願參加的人，再多也會有偏誤。", "exp": 7}, {"m": "M15", "n": "小樣本也很穩定", "belief": "只抽 10 筆算出來的 r，重抽一次也會差不多。", "fix": "樣本越小，r 越容易隨抽到誰而大幅擺盪。", "exp": 7}, {"m": "M16", "n": "少數的訊號一定看得到", "belief": "少數群體裡的強關係，放進整體也看得出來。", "fix": "人數懸殊時，多數群體會把少數群體的訊號稀釋掉。", "exp": 11}, {"m": "M17", "n": "換算法不影響結論", "belief": "用「少了幾個」或「掉了幾成」、名目或實質，結論都一樣。", "fix": "指標的算法會改變排名和結論。要先想清楚怎麼比才公平。", "exp": 14}, {"m": "M18", "n": "讀錯變數的意思", "belief": "圖或結論說的，就是字面上最直覺的那個量。", "fix": "先確認 X、Y 各是什麼、單位和方向。例如「掉了幾成」不等於「生得少」。", "exp": 6}], "qtypes": ["基本概念與散佈圖", "相關係數與關係強弱", "離群值與模型診斷", "因果與混淆陷阱", "迴歸線與預測"]};
+// 校準後的題目難度：把 R 腳本輸出的 b_for_page.txt 內容貼在大括號裡，例如 {"R0101":-1.23,"R0102":0.41}
+const CALIB={};
+const BANK=DATA.bank, MIS={}, CON={}, BYID={};
+BANK.forEach(q=>{if(typeof CALIB[q.id]==="number")q.b=CALIB[q.id];});
+if(Object.keys(CALIB).length)CFG.VERSION+="+calib";
+DATA.mis.forEach(m=>MIS[m.m]=m);
+DATA.concepts.forEach(c=>CON[c.c]=c);
+BANK.forEach(q=>BYID[q.id]=q);
+const CATPOOL=BANK.filter(q=>!q.f);               // 前後測題本不進適性題池，避免洩題
+const EXP={1:["t1","拖一個點，線就跟著動"],2:["tS","自己造一組資料"],3:["tP","用這條線來預測"],4:["t3","相關係數 r 是什麼？"],5:["t4","猜猜看，這張圖的 r"],6:["t5","九個變數，哪個跟生育率有關？"],7:["t6","搞亂資料看看！"],8:["t11","加一個離群值"],9:["t12","改變樣本結構"],10:["t14","改變分類比例"],11:["t15","製造不平衡資料"],12:["t7","r 一樣，圖卻完全不同"],13:["tC","冰淇淋賣越多，溺水越多？"],14:["t8","換個算法，排行榜就翻了"]};
+const MODE_NAME={cat:"適性診斷",pre:"前測",post:"後測",cal:"題庫練習"};
+const CONF_NAME={1:"用猜的",2:"有點把握",3:"很確定"};
+const LET="ABCD";
+
+/* ================= 小工具 ================= */
+const $=id=>document.getElementById(id);
+const now=()=>performance.now();
+const r2=x=>Math.round(x*100)/100;
+function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+// 確認視窗：放在 Google 協作平台時，瀏覽器可能直接略過 confirm（瞬間回傳 false），這時視為同意
+function ask(msg){const t0=performance.now();const r=window.confirm(msg);return r||performance.now()-t0<30;}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function stamp(){const d=new Date(),p=n=>String(n).padStart(2,"0");return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"-"+p(d.getHours())+p(d.getMinutes());}
+function expLink(n){const e=EXP[n];if(!e)return "";
+  if(window.__BASE_URL)return window.__BASE_URL+"?page=lab&goto="+e[0];
+  return CFG.LAB_URL?CFG.LAB_URL+"#"+e[0]:"";}
+// 放在 Google Apps Script 上時，直接呼叫伺服器函式送資料、讀設定
+function gasRun(){try{return (window.google&&google.script&&google.script.run)||null;}catch(e){return null;}}
+function expName(n){const e=EXP[n];return e?"實驗 "+n+"〈"+e[1]+"〉":"";}
+function show(v){["vStart","vQuiz","vResult"].forEach(k=>$(k).hidden=(k!==v));window.scrollTo({top:0,behavior:"smooth"});}
+
+/* ================= Rasch 能力估計（EAP，常態先驗） ================= */
+const GRID=[];for(let t=-4;t<=4.0001;t+=0.05)GRID.push(t);
+const P=(t,b)=>1/(1+Math.exp(-(t-b)));
+function estimate(rs){
+  const lw=GRID.map(t=>-t*t/2);
+  rs.forEach(r=>{for(let i=0;i<GRID.length;i++){const p=P(GRID[i],r.b);lw[i]+=r.x?Math.log(p):Math.log(1-p);}});
+  const mx=Math.max(...lw),w=lw.map(v=>Math.exp(v-mx)),s=w.reduce((a,b)=>a+b,0);
+  const m=w.reduce((a,v,i)=>a+v*GRID[i],0)/s;
+  const va=w.reduce((a,v,i)=>a+v*(GRID[i]-m)**2,0)/s;
+  return {theta:m,se:Math.sqrt(va)};
+}
+function level(t){
+  if(t>=1)return ["進階","陷阱大多看得穿，可以挑戰延伸關卡"];
+  if(t>=0)return ["穩健","基本觀念扎實，少數陷阱還會踩到"];
+  if(t>=-1)return ["基礎","會讀線和 r，陷阱題還需要多練"];
+  return ["起步","先從讀懂一條線和它的 r 開始"];
+}
+
+/* ================= 狀態與紀錄 ================= */
+let S=null;
+function newSession(mode){
+  const typed=$("who").value.trim().replace(/[,\n\r"]/g," ");
+  S={sid:"S"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+     who:typed||("R-"+Math.random().toString(36).slice(2,7).toUpperCase()),
+     mode,age:$("age").value,bg:$("bg").value,
+     t0:now(),startISO:new Date().toISOString(),endISO:"",
+     resp:[],ev:[],evSeq:0,used:new Set(),theta:0,se:1,
+     traj:[{theta:0,se:1}],queue:[],qi:0,phase:"main",rem:null,remDone:{},
+     calNote:false,cur:null,sent:0,mainDone:false};
+  if(mode==="pre")S.queue=shuffle(DATA.forms.A);
+  if(mode==="post")S.queue=shuffle(DATA.forms.B);
+  if(mode==="cal")S.queue=shuffle(BANK.map(q=>q.id));
+}
+function log(event,item,detail){
+  if(!S)return;
+  S.ev.push({session_id:S.sid,respondent:S.who,mode:S.mode,ev_seq:++S.evSeq,
+    ms:Math.round(now()-S.t0),time:new Date().toISOString(),event,item_id:item||"",
+    detail:detail==null?"":(typeof detail==="string"?detail:JSON.stringify(detail))});
+}
+function mainResp(){return S.resp.filter(r=>r.phase==="main");}
+
+/* ================= 選題 ================= */
+function pickCAT(){
+  const cand=CATPOOL.filter(q=>!S.used.has(q.id));
+  if(!cand.length)return null;
+  const cnt={};mainResp().forEach(r=>cnt[r.concept]=(cnt[r.concept]||0)+1);
+  // 最大訊息量 + 概念平衡（同概念已出越多題，越不優先）+ 前 5 題隨機挑（控制曝光）
+  const sc=cand.map(q=>{const p=P(S.theta,q.b);return {q,s:p*(1-p)-0.04*(cnt[q.c]||0)+Math.random()*1e-6};})
+               .sort((a,b)=>b.s-a.s).slice(0,5);
+  return sc[Math.floor(Math.random()*sc.length)].q;
+}
+function mainStop(){
+  const n=mainResp().length;
+  if(S.mode==="cat")return n>=CFG.MAX_ITEMS||(n>=CFG.MIN_ITEMS&&S.se<CFG.SE_STOP);
+  return S.qi>=S.queue.length;
+}
+function nextMain(){
+  if(mainStop())return finishMain();
+  const q=S.mode==="cat"?pickCAT():BYID[S.queue[S.qi++]];
+  if(!q)return finishMain();
+  showItem(q);
+}
+
+/* ================= 出題與作答 ================= */
+function showItem(q){
+  S.cur={q,perm:shuffle([0,1,2,3]),tShow:now(),tFirst:null,tSubmit:null,sel:null,changes:0,
+         hiddenMs:0,hiddenAt:document.hidden?now():null,done:false};
+  const n=S.phase==="main"?mainResp().length+1:S.rem.i+1;
+  $("qMode").innerHTML="<b>"+(S.phase==="main"?MODE_NAME[S.mode]:"補強練習")+"</b>";
+  let total="";
+  if(S.phase==="rem")total=" / "+S.rem.items.length;
+  else if(S.mode==="cal")total=" / "+BANK.length;
+  else if(S.mode!=="cat")total=" / "+S.queue.length;
+  $("qCount").textContent="第 "+n+total+" 題";
+  const denom=S.phase==="rem"?S.rem.items.length:(S.mode==="cat"?CFG.MAX_ITEMS:(S.mode==="cal"?BANK.length:S.queue.length));
+  $("qProg").style.width=Math.min(100,(n-1)/denom*100)+"%";
+  const bn=$("qBanner");
+  if(S.phase==="rem"){bn.hidden=false;bn.textContent="針對「"+MIS[S.rem.m].n+"」的補強題。答完會告訴你這個迷思破解了沒有。";}
+  else if(S.mode==="cal"&&mainResp().length>=CFG.CAL_MIN){bn.hidden=false;
+    bn.textContent="你已經完成 "+CFG.CAL_MIN+" 題，可以隨時按「結束作答」。願意的話，繼續作答對題庫幫助更大。";
+    if(!S.calNote){S.calNote=true;log("cal_min_reached");}}
+  else bn.hidden=true;
+  $("qText").textContent=q.q;
+  const box=$("qOpts");box.innerHTML="";
+  S.cur.perm.forEach((orig,k)=>{
+    const b=document.createElement("button");
+    b.type="button";b.className="opt";b.setAttribute("aria-pressed","false");
+    b.innerHTML='<span class="n">'+(k+1)+'</span><span></span>';
+    b.lastChild.textContent=q.o[orig];
+    b.onclick=()=>choose(k);
+    box.appendChild(b);
+  });
+  $("qConf").hidden=true;$("qFb").hidden=true;$("goNext").hidden=true;
+  log("item_show",q.id,{phase:S.phase,b:q.b,theta:r2(S.theta)});
+}
+function choose(k){
+  const c=S.cur;if(!c||c.done)return;
+  if(c.sel!==null&&c.sel!==k)c.changes++;
+  if(c.tFirst===null)c.tFirst=now();
+  c.sel=k;
+  [...$("qOpts").children].forEach((b,j)=>b.setAttribute("aria-pressed",j===k?"true":"false"));
+  $("qConf").hidden=false;
+  log("option_select",c.q.id,LET[c.perm[k]]);
+}
+function submit(conf){
+  const c=S.cur;if(!c||c.done||c.sel===null)return;
+  c.done=true;c.tSubmit=now();
+  if(c.hiddenAt!==null){c.hiddenMs+=now()-c.hiddenAt;c.hiddenAt=null;}
+  const q=c.q,orig=c.perm[c.sel],ok=orig===q.k,mis=ok?"":(q.m[orig]||"");
+  const before=S.theta;
+  S.used.add(q.id);
+  const row={session_id:S.sid,respondent:S.who,mode:S.mode,phase:S.phase,
+    seq:S.resp.length+1,item_id:q.id,concept:q.c,level:q.lv,diff:q.d,b:q.b,form:q.f||"",
+    chosen:LET[orig],key:LET[q.k],correct:ok?1:0,mis_code:mis,confidence:conf,
+    rt_sec:r2((c.tSubmit-c.tShow)/1000),rt_first_sec:r2((c.tFirst-c.tShow)/1000),
+    changes:c.changes,hidden_sec:r2(c.hiddenMs/1000),read_sec:"",
+    theta_before:r2(before),theta_after:"",se_after:"",
+    remedial_for:S.phase==="rem"?S.rem.m:"",age_group:S.age,stats_bg:S.bg,
+    time:new Date().toISOString(),version:CFG.VERSION};
+  S.resp.push(row);
+  const est=estimate(S.resp.map(r=>({b:r.b,x:r.correct})));
+  S.theta=est.theta;S.se=est.se;
+  row.theta_after=r2(est.theta);row.se_after=r2(est.se);
+  if(S.phase==="main")S.traj.push({theta:est.theta,se:est.se,b:q.b,x:ok});
+  if(S.phase==="rem")S.rem.res.push(row);
+  log("submit",q.id,{chosen:row.chosen,correct:row.correct,mis,conf});
+  $("qConf").hidden=true;
+  // 前後測不給解答，直接下一題
+  if(S.phase==="main"&&(S.mode==="pre"||S.mode==="post")){advance();return;}
+  const btns=[...$("qOpts").children];
+  btns.forEach((b,j)=>{b.disabled=true;
+    if(c.perm[j]===q.k)b.classList.add("is-ok");
+    else if(j===c.sel)b.classList.add("is-no");
+    else b.classList.add("is-dim");});
+  const fb=$("qFb");
+  const keyPos=c.perm.indexOf(q.k)+1;
+  let h=ok?'<p class="fb-h ok">答對了。</p>':'<p class="fb-h no">不對，正確答案是第 '+keyPos+' 個選項。</p>';
+  h+="<p>"+esc(q.ex)+"</p>";
+  if(mis&&MIS[mis]){const m=MIS[mis];
+    h+='<div class="mis"><p><b>這個選項背後常見的想法：</b>'+esc(m.belief)+'</p><p><b>其實：</b>'+esc(m.fix)+'</p></div>';}
+  const ln=expLink(q.exp);
+  h+='<p class="meta">觀念：'+esc(CON[q.c].n)+'。想親手試試，可以玩'+
+     (ln?'<a href="'+esc(ln)+'" target="_blank" rel="noopener" data-exp="'+q.exp+'">'+esc(expName(q.exp))+'</a>':esc(expName(q.exp)))+'。</p>';
+  fb.innerHTML=h;fb.hidden=false;
+  const nb=$("goNext");nb.hidden=false;
+  nb.textContent=willEnd()?"看結果":"下一題";
+  nb.focus({preventScroll:true});
+}
+function willEnd(){
+  if(S.phase==="rem")return S.rem.i+1>=S.rem.items.length;
+  if(S.mode==="cat"){const n=mainResp().length;return n>=CFG.MAX_ITEMS||(n>=CFG.MIN_ITEMS&&S.se<CFG.SE_STOP)||CATPOOL.every(q=>S.used.has(q.id));}
+  return S.qi>=S.queue.length;
+}
+function advance(){
+  const last=S.resp[S.resp.length-1];
+  if(last&&S.cur&&S.cur.tSubmit)last.read_sec=r2((now()-S.cur.tSubmit)/1000);
+  log("next",S.cur?S.cur.q.id:"");
+  S.cur=null;
+  if(S.phase==="rem")nextRem();else nextMain();
+}
+
+/* ================= 結束、診斷與補強 ================= */
+function finishMain(){
+  S.mainDone=true;S.phase="done";S.endISO=new Date().toISOString();
+  log("main_end","",{n:mainResp().length,theta:r2(S.theta),se:r2(S.se)});
+  renderResult();sendRemote();
+}
+function diagnose(){
+  const ev={},opp={},hi={},pick={};
+  S.resp.forEach(r=>{
+    const q=BYID[r.item_id];
+    new Set(q.m.filter(Boolean)).forEach(m=>opp[m]=(opp[m]||0)+1);
+    if(r.mis_code){const m=r.mis_code;
+      ev[m]=(ev[m]||0)+(r.confidence===3?2:1);
+      pick[m]=(pick[m]||0)+1;if(r.confidence===3)hi[m]=(hi[m]||0)+1;}
+  });
+  return Object.keys(ev).map(m=>({m,score:ev[m],picks:pick[m],hi:hi[m]||0,opp:opp[m]||0}))
+    .sort((a,b)=>b.score-a.score||b.picks-a.picks);
+}
+function remPool(m){
+  return CATPOOL.filter(q=>!S.used.has(q.id)&&q.m.includes(m))
+    .sort((a,b)=>Math.abs(a.b-S.theta)-Math.abs(b.b-S.theta)).slice(0,CFG.REM_ITEMS);
+}
+function startRem(m){
+  const items=remPool(m);if(!items.length)return;
+  S.phase="rem";S.rem={m,items,i:0,res:[]};
+  log("remedial_start","",{mis:m,n:items.length});
+  show("vQuiz");showItem(items[0]);
+}
+function nextRem(){
+  S.rem.i++;
+  if(S.rem.i<S.rem.items.length){showItem(S.rem.items[S.rem.i]);return;}
+  const res=S.rem.res,n=res.length,cor=res.reduce((a,r)=>a+r.correct,0),
+        picked=res.filter(r=>r.mis_code===S.rem.m).length;
+  const status=(n>0&&cor>=Math.ceil(n*2/3)&&picked===0)?"resolved":"retry";
+  S.remDone[S.rem.m]={n,correct:cor,picked,status};
+  log("remedial_end","",{mis:S.rem.m,n,correct:cor,picked,status});
+  S.phase="done";S.rem=null;
+  renderResult();sendRemote();
+}
+
+/* ================= 結果畫面 ================= */
+function trajSVG(){
+  const T=S.traj,n=T.length-1,W=640,H=290,M={l:40,r:64,t:14,b:34};
+  const X=i=>M.l+i*(W-M.l-M.r)/Math.max(n,1);
+  const cl=t=>Math.max(-3,Math.min(3,t));
+  const Y=t=>M.t+(3-cl(t))/6*(H-M.t-M.b);
+  let s='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="能力估計隨題數變化的折線圖">';
+  [-3,-2,-1,0,1,2,3].forEach(t=>{s+='<line class="'+(t===0?"zero":"grid")+'" x1="'+M.l+'" x2="'+(W-M.r)+'" y1="'+Y(t)+'" y2="'+Y(t)+'"/>'+
+    '<text class="tick" x="'+(M.l-8)+'" y="'+(Y(t)+4)+'" text-anchor="end">'+(t>0?"+":"")+t+'</text>';});
+  [["進階",2],["穩健",.5],["基礎",-.5],["起步",-2]].forEach(([l,t])=>s+='<text class="lvl" x="'+(W-M.r+10)+'" y="'+(Y(t)+5)+'">'+l+'</text>');
+  let up="",dn="";
+  T.forEach((p,i)=>{up+=X(i)+","+Y(p.theta+p.se)+" ";});
+  for(let i=T.length-1;i>=0;i--)dn+=X(i)+","+Y(T[i].theta-T[i].se)+" ";
+  s+='<polygon class="band" points="'+up+dn+'"/>';
+  T.forEach((p,i)=>{if(i>0){const x=X(i),y=Y(p.b);s+='<path class="diff" d="M'+x+' '+(y-6)+'L'+(x+6)+' '+y+'L'+x+' '+(y+6)+'L'+(x-6)+' '+y+'Z"/>';}});
+  s+='<polyline class="path" points="'+T.map((p,i)=>X(i)+","+Y(p.theta)).join(" ")+'"/>';
+  T.forEach((p,i)=>{if(i>0)s+='<circle class="'+(p.x?"dot-ok":"dot-no")+'" cx="'+X(i)+'" cy="'+Y(p.theta)+'" r="5.5"/>';});
+  for(let i=0;i<=n;i++)if(n<=15||i%2===0)s+='<text class="tick" x="'+X(i)+'" y="'+(H-12)+'" text-anchor="middle">'+(i===0?"起點":i)+'</text>';
+  return s+"</svg>";
+}
+function conceptMap(){
+  let h='<div class="cmap">';
+  DATA.concepts.forEach(c=>{
+    const rs=S.resp.filter(r=>r.concept===c.c);
+    const ln=expLink(c.exp);
+    h+='<div class="crow"><span>'+esc(c.n)+'</span><span class="dots">'+
+      (rs.length?rs.map(r=>'<i class="d '+(r.correct?"ok":"no")+'" title="'+esc(r.item_id)+'"></i>').join(""):'<span class="none">這次沒有考到</span>')+
+      '</span>'+(ln?'<a href="'+esc(ln)+'" target="_blank" rel="noopener" data-exp="'+c.exp+'">實驗 '+c.exp+'</a>':'<span class="none">實驗 '+c.exp+'</span>')+'</div>';
+  });
+  return h+"</div>";
+}
+function renderResult(){
+  const v=$("vResult"),mr=mainResp(),nC=mr.reduce((a,r)=>a+r.correct,0);
+  let h='<div class="card">';
+  if(S.mode==="cat"){const [lv,desc]=level(S.theta);
+    h+='<p class="r-level">'+lv+'</p><p class="r-line">'+desc+'。作答 <b>'+mr.length+'</b> 題，答對 <b>'+nC+
+       '</b> 題；能力估計 θ = <b>'+(S.theta>=0?"+":"")+S.theta.toFixed(2)+'</b>（誤差 ±'+S.se.toFixed(2)+'）。</p>';
+  }else{
+    h+='<p class="r-level">'+nC+' / '+mr.length+'</p><p class="r-line">'+MODE_NAME[S.mode]+'答對 '+nC+' 題。能力估計 θ = '+
+       (S.theta>=0?"+":"")+S.theta.toFixed(2)+'（誤差 ±'+S.se.toFixed(2)+'）。</p>';
+  }
+  h+='</div>';
+  if(S.mode==="cat"&&S.traj.length>1){
+    h+='<div class="card"><h2>能力估計怎麼一步步收斂</h2><p class="h2-sub">每答一題，系統就重新估計一次你的能力，再挑難度接近的下一題。陰影越窄，估計越確定。</p>'+
+       trajSVG()+'<div class="legend"><span><i class="lg ok"></i>答對後的估計</span><span><i class="lg no"></i>答錯後的估計</span>'+
+       '<span><i class="lg df"></i>那一題的難度</span><span><i class="lg bd"></i>估計誤差範圍</span></div></div>';
+  }
+  h+='<div class="card">'+__QT(S.resp.filter(r=>r.phase==="main").map(r=>({t:(BYID[r.item_id]||{}).t,ok:r.correct})),DATA.qtypes,"#17798E")+'</div>';
+  h+='<div class="card"><h2>各觀念的作答</h2><p class="h2-sub">實心是答對，空心是答錯。點右邊可以打開對應的互動實驗。</p>'+conceptMap()+'</div>';
+  // 迷思診斷
+  const dg=diagnose();
+  h+='<div class="card"><h2>你可能卡住的地方</h2>';
+  if(!dg.length){
+    h+='<p>這次沒有選到任何常見迷思的選項。想挑戰更難的，可以玩實驗 11 到 14 的延伸關卡。</p>';
+  }else{
+    h+='<p class="h2-sub">依你選到的答案判斷。同一種想法出現兩次以上，或很確定地選了它，就列為「很可能」。</p>';
+    dg.slice(0,4).forEach(d=>{
+      const m=MIS[d.m],done=S.remDone[d.m],strong=d.score>=2,pool=remPool(d.m),ln=expLink(m.exp);
+      h+='<div class="mcard'+(strong&&!(done&&done.status==="resolved")?" strong":"")+'"><div class="mhead"><b>'+esc(m.n)+'</b>';
+      if(done)h+=done.status==="resolved"?'<span class="tag good">補強後已破解</span>':'<span class="tag">補強後還要再練</span>';
+      else h+=strong?'<span class="tag">很可能</span>':'<span class="tag mid">可能</span>';
+      h+='</div><p><b>你可能以為：</b>'+esc(m.belief)+'</p><p><b>其實：</b>'+esc(m.fix)+'</p>'+
+         '<p class="ev">在 '+d.opp+' 題相關題目中，選了 '+d.picks+' 次這類答案'+(d.hi?'，其中 '+d.hi+' 次選「很確定」':'')+'。'+
+         (done?' 補強題答對 '+done.correct+' / '+done.n+'。':'')+'</p><div class="acts">';
+      if(ln)h+='<a href="'+esc(ln)+'" target="_blank" rel="noopener" data-exp="'+m.exp+'" data-mis="'+d.m+'">打開'+esc(expName(m.exp))+'</a>';
+      else h+='<span class="ev">回去玩'+esc(expName(m.exp))+'</span>';
+      if(pool.length)h+='<button class="b2" type="button" data-rem="'+d.m+'">'+(done?"再做 ":"做 ")+pool.length+' 題補強</button>';
+      h+='</div></div>';
+    });
+  }
+  h+='</div>';
+  // 資料
+  h+='<div class="card"><h2>作答紀錄</h2><p class="h2-sub">研究團隊用這些紀錄估計題目難度、分析迷思與學習歷程。代號：'+esc(S.who)+'</p>'+
+     '<div class="data-row"><button class="b2" type="button" id="dlResp">下載作答紀錄（CSV）</button>'+
+     '<button class="b2" type="button" id="dlEv">下載操作紀錄（CSV）</button>'+
+     '<button class="link" type="button" id="goAgain">重新開始</button>'+
+     ((window.__BASE_URL||CFG.HOME_URL)?'<a class="link" data-nav="1" href="'+esc(window.__BASE_URL||CFG.HOME_URL)+'" target="_top">回首頁</a>':'')+'</div><p class="status" id="sendStatus"></p><button class="b2" type="button" id="resend" hidden>重新送出</button></div>';
+  v.innerHTML=h;show("vResult");
+  $("dlResp").onclick=()=>save("迴歸作答紀錄_"+S.who+"_"+stamp()+".csv",toCSV(S.resp,RESP_COLS),"responses");
+  $("dlEv").onclick=()=>save("迴歸操作紀錄_"+S.who+"_"+stamp()+".csv",toCSV(S.ev,EV_COLS),"events");
+  $("goAgain").onclick=()=>{if(ask("重新開始會清除這次的紀錄。要先下載嗎？按「取消」回去下載。")){log("restart");S=null;show("vStart");}};
+  v.querySelectorAll("[data-rem]").forEach(b=>b.onclick=()=>startRem(b.dataset.rem));
+  $("resend").onclick=()=>{log("resend_click");sendRemote();};
+  updateSendStatus();
+  log("result_show","",{theta:r2(S.theta),se:r2(S.se),flag:dg.filter(d=>d.score>=2).map(d=>d.m).join("|")});
+}
+
+/* ================= 匯出與上傳 ================= */
+const RESP_COLS=["session_id","respondent","mode","phase","seq","item_id","concept","level","diff","b","form","chosen","key","correct",
+  "mis_code","confidence","rt_sec","rt_first_sec","changes","hidden_sec","read_sec","theta_before","theta_after","se_after",
+  "remedial_for","age_group","stats_bg","time","version"];
+const EV_COLS=["session_id","respondent","mode","ev_seq","ms","time","event","item_id","detail"];
+function toCSV(rows,cols){
+  const cell=v=>{const s=v==null?"":String(v);return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  return "\uFEFF"+[cols.join(",")].concat(rows.map(r=>cols.map(c=>cell(r[c])).join(","))).join("\r\n");
+}
+async function save(name,text,kind){
+  log("download","",kind);
+  try{
+    if(window.claude&&typeof window.claude.use==="function"){
+      const dl=await window.claude.use("downloads");
+      if(dl){await dl.save({filename:name,data:text});return;}
+    }
+  }catch(e){if(e&&e.code==="declined")return;}
+  const url=URL.createObjectURL(new Blob([text],{type:"text/csv;charset=utf-8"}));
+  const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+function summary(){
+  const mr=mainResp(),dg=diagnose();
+  return {session_id:S.sid,respondent:S.who,mode:S.mode,age_group:S.age,stats_bg:S.bg,start:S.startISO,end:S.endISO,
+    n_main:mr.length,correct_main:mr.reduce((a,r)=>a+r.correct,0),theta:r2(S.theta),se:r2(S.se),
+    flagged:dg.filter(d=>d.score>=2).map(d=>d.m).join("|"),remedial:JSON.stringify(S.remDone),version:CFG.VERSION};
+}
+let sendState="";
+// 送出紀錄：兩條路輪流試。
+//  1. 直接 POST 到網頁應用程式網址（不帶登入資訊，不受「瀏覽器登入好幾個 Google 帳號」影響）
+//  2. google.script.run（放在 Apps Script 上時才有）
+function postURL(){return window.__BASE_URL||CFG.SUBMIT_URL||"";}
+function postViaFetch(url,body){
+  return fetch(url,{method:"POST",body,headers:{"Content-Type":"text/plain;charset=utf-8"},credentials:"omit",redirect:"follow"})
+    .then(r=>r.text()).then(t=>{if(!/^\s*ok/.test(t))throw new Error("伺服器回應："+(t||"空白").slice(0,60));});
+}
+function postViaGas(body){
+  return new Promise((res,rej)=>{const run=gasRun();if(!run)return rej(new Error("no gas"));
+    run.withSuccessHandler(res).withFailureHandler(e=>rej(e instanceof Error?e:new Error(String(e)))).submitRecord(body);});
+}
+let sendFailed=false,sending=false;
+function sendRemote(){
+  const url=postURL(),run=gasRun();
+  if(!url&&!run){sendState="";return updateSendStatus();}
+  if(sending)return;
+  const body=JSON.stringify({session:summary(),responses:S.resp,events:S.ev});
+  const tries=[];if(url)tries.push(["fetch",()=>postViaFetch(url,body)]);if(run)tries.push(["gas",()=>postViaGas(body)]);
+  const errs=[];sending=true;sendFailed=false;sendState="正在送出紀錄…";updateSendStatus();
+  let chain=Promise.reject(null);
+  tries.forEach(([name,fn])=>{chain=chain.catch(e=>{if(e)errs.push(e.message||String(e));return fn().then(()=>name);});});
+  chain.then(name=>{sending=false;S.sent++;sendState="紀錄已自動送出（第 "+S.sent+" 次）。";log("remote_ok","",name);updateSendStatus();})
+    .catch(e=>{sending=false;if(e)errs.push(e.message||String(e));sendFailed=true;
+      sendState="自動送出沒有成功，請按「重新送出」再試一次；還是不行的話，請下載作答紀錄交給研究團隊。（原因："+errs.join("／").slice(0,140)+"）";
+      log("remote_fail","",errs.join(" / ").slice(0,300));updateSendStatus();});
+}
+function updateSendStatus(){
+  const el=$("sendStatus");if(el)el.textContent=sendState||((postURL()||gasRun())?"":"請下載作答紀錄，交給研究團隊。");
+  const rb=$("resend");if(rb)rb.hidden=!sendFailed||sending;
+}
+
+/* ================= 事件綁定 ================= */
+$("goStart").onclick=()=>{
+  const pick=[...document.querySelectorAll('input[name="mode"]')].find(x=>x.checked&&!x.closest(".mode").hidden);
+  if(!pick)return;
+  const mode=pick.value;
+  newSession(mode);
+  log("session_start","",{mode,age:S.age,bg:S.bg,ua:navigator.userAgent.slice(0,120),w:innerWidth});
+  show("vQuiz");nextMain();
+};
+document.querySelectorAll("#qConf [data-c]").forEach(b=>b.onclick=()=>submit(+b.dataset.c));
+$("goNext").onclick=advance;
+$("goQuit").onclick=()=>{
+  if(!S)return;
+  if(S.phase==="rem"){if(ask("要停止補強練習嗎？")){S.rem.i=S.rem.items.length-1;S.cur&&(S.cur.done=true);log("quit_remedial");nextRem();}return;}
+  if(!mainResp().length){if(ask("還沒有作答，要回到開始畫面嗎？")){S=null;show("vStart");}return;}
+  if(ask("確定要結束嗎？已作答的 "+mainResp().length+" 題會列入結果。")){log("quit");finishMain();}
+};
+document.addEventListener("click",e=>{const a=e.target.closest("a[data-exp]");if(a&&S)log("lab_click","",{exp:a.dataset.exp,mis:a.dataset.mis||""});});
+document.addEventListener("visibilitychange",()=>{
+  if(!S)return;log(document.hidden?"tab_hidden":"tab_visible");
+  const c=S.cur;if(!c||c.done)return;
+  if(document.hidden)c.hiddenAt=now();else if(c.hiddenAt!==null){c.hiddenMs+=now()-c.hiddenAt;c.hiddenAt=null;}
+});
+document.addEventListener("keydown",e=>{
+  if($("vQuiz").hidden||!S||!S.cur||e.target.tagName==="INPUT"||e.target.tagName==="SELECT")return;
+  if(!S.cur.done&&/^[1-4]$/.test(e.key)){e.preventDefault();choose(+e.key-1);}
+  else if(S.cur.done&&!$("goNext").hidden&&(e.key==="Enter")){e.preventDefault();advance();}
+});
+// 網址參數：?mode=pre&who=R07&lock=1 可以固定作答方式，方便發連結給全班
+try{
+  const u=new URLSearchParams(window.__PARAMS||location.search);
+  const m=u.get("mode");if(m&&MODE_NAME[m]){const r=document.querySelector('input[name="mode"][value="'+m+'"]');if(r)r.checked=true;
+    if(u.get("lock")==="1")document.querySelectorAll('input[name="mode"]').forEach(x=>{if(x.value!==m)x.closest(".mode").hidden=true;});}
+  const w=u.get("who");if(w)$("who").value=w.slice(0,24);
+}catch(e){}
+// 讀取老師後台的開放設定（有設定 SUBMIT_URL 時才會讀）
+function applyRemoteConfig(c){
+  if(!c||!c.modes)return;
+  const boxes=[...document.querySelectorAll('input[name="mode"]')];
+  boxes.forEach(x=>{if(c.modes[x.value]===false)x.closest(".mode").hidden=true;});
+  const vis=boxes.filter(x=>!x.closest(".mode").hidden);
+  if(!vis.length){$("closedMsg").hidden=false;$("goStart").disabled=true;}
+  else if(!vis.some(x=>x.checked))vis[0].checked=true;
+  if(c.notice){$("notice").textContent=c.notice;$("notice").hidden=false;}
+}
+function configViaFetch(){
+  const u=postURL();if(!u)return;
+  fetch(u+(u.includes("?")?"&":"?")+"action=config",{credentials:"omit"}).then(r=>r.json()).then(applyRemoteConfig).catch(()=>{});
+}
+if(gasRun()){gasRun().withSuccessHandler(applyRemoteConfig).withFailureHandler(configViaFetch).getPublicConfig();}
+else configViaFetch();
+// 作答到一半點上方導覽列離開時，先確認（離開會中斷，還沒送出的作答不會保存）
+document.addEventListener("click",e=>{
+  const a=e.target.closest('a[data-nav]');
+  if(!a||!S||S.mainDone||!S.resp.length)return;
+  if(!ask("作答還沒結束，離開的話這次的作答不會保存。確定要離開嗎？")){e.preventDefault();return;}
+  log("leave_midway");
+});
+// 測試用：讓自動化測試可以讀取狀態
+window.__regQuiz={get state(){return S;},CFG,estimate};
+})();
+</script>
+<script src="tutor.js" data-topic="regression" data-station="quiz"></script>
+<script>window.ULAB_TOPIC="reg";</script>
+<script data-step="quiz">/* ============================================================
+   共用追蹤（四個主題用同一套「走到哪一步」＋「學習紀錄」）
+   用法：做上線版.py 會在各主題頁最後插入：先設定 window.ULAB_TOPIC="reg|km|dt|vz"，再放這個檔的內容
+   原始檔不動；各主題原本自己的紀錄（K-means 的 km_log、迴歸測驗送試算表…）照舊保留，這個是另外加的一份統一格式。
+   ------------------------------------------------------------
+   1. 進度：localStorage "ulab_progress" ＝ {reg:{life:1,guess:1,…}, km:{…}, …}
+      選主題首頁讀它，在每張主題卡上顯示「已走 6 / 10 步」
+   2. 紀錄：localStorage "ulab_log"（最多 3000 筆），每筆
+      {ts, sid, topic, step, type, dwell_s, …}；type＝step_view／step_leave，測驗之後可以用 ULAB.ev() 加
+   3. ENDPOINT 填上 Apps Script 網址才會真的送出去（目前空白＝完全不連外）
+   ============================================================ */
+(function(){
+"use strict";
+var ENDPOINT = "";   // ← 之後四個主題共用一個 Apps Script 網址，只要改這裡
+var TOPIC = window.ULAB_TOPIC || "";
+var STEPS = ["life","guess","story","principle","lab","chaos","myth","quiz","diag","next"];
+// 存不進瀏覽器（空間滿／被擋）時先記在記憶體，這一頁內進度、成就、完成提示照樣能用
+var MEMO={};
+function get(k, d){ if(k in MEMO) return JSON.parse(MEMO[k]); try{ return JSON.parse(localStorage.getItem(k)) || d; }catch(e){ return d; } }
+function put(k, v){ var j=JSON.stringify(v); try{ localStorage.setItem(k, j); delete MEMO[k]; return; }catch(e){} MEMO[k]=j; }
+
+var sid; try{ sid=localStorage.getItem("ulab_sid"); }catch(e){}
+if(!sid){ sid="U"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); try{ localStorage.setItem("ulab_sid",sid); }catch(e){} }
+var QS=new URLSearchParams(location.search);
+var queue=[], timer=null;
+function flush(){
+  timer=null; if(!ENDPOINT || !queue.length){ queue=[]; return; }
+  var body=JSON.stringify(queue); queue=[];
+  try{ if(navigator.sendBeacon) navigator.sendBeacon(ENDPOINT, new Blob([body],{type:"text/plain"}));
+       else fetch(ENDPOINT,{method:"POST",mode:"no-cors",body:body}); }catch(e){}
+}
+function ev(type, data){
+  var r={ts:new Date().toISOString(), sid:sid, uid:QS.get("uid")||"", src:QS.get("src")||"", topic:TOPIC, step:cur||"", type:type};
+  if(data) for(var k in data) r[k]=data[k];
+  var all=get("ulab_log",[]); all.push(r); put("ulab_log", all.slice(-3000));
+  queue.push(r); if(!timer) timer=setTimeout(flush, 4000);
+  return r;
+}
+
+var cur=null, t0=Date.now();
+function visit(step){
+  if(!step || step===cur) return;
+  if(cur) ev("step_leave",{dwell_s:Math.round((Date.now()-t0)/1000)});
+  cur=step; t0=Date.now();
+  if(STEPS.indexOf(step)>=0){ var p=get("ulab_progress",{}); p[TOPIC]=p[TOPIC]||{}; p[TOPIC][step]=1; put("ulab_progress",p); }
+  ev("step_view");
+}
+window.addEventListener("stt-station",function(e){ visit(e.detail); });
+if(window.STT_STATION) visit(window.STT_STATION);              // 頁面比這支程式早切好第一步
+var me=document.currentScript, fixed=me && me.dataset.step;    // 迴歸測驗頁：整頁就是 ⑧
+if(fixed) visit(fixed);
+window.addEventListener("pagehide",function(){ if(cur) ev("step_leave",{dwell_s:Math.round((Date.now()-t0)/1000)}); flush(); });
+
+window.ULAB={ev:ev, visit:visit, sid:sid,
+  progress:function(){ return get("ulab_progress",{}); },
+  log:function(){ return get("ulab_log",[]); }};
+})();
+</script>
+<script>/* ============================================================
+   成就系統（輕量版，2026-11-10）
+   - 做上線版.py 插進各主題頁（ULAB_TOPIC＝reg|km|dt|vz）與選主題頁（ULAB_TOPIC＝home）；原始檔不動
+   - 只存在這台瀏覽器：localStorage "ulab_ach"（換電腦／清瀏覽資料就歸零）
+   - 主題頁：偵測到就跳一個小提示；選主題頁：畫「我的成就」徽章牆
+   - 隱藏彩蛋：牆上不列出，只在頁尾用很淡的一行字顯示找到幾個
+   ============================================================ */
+(function(){
+"use strict";
+var TOPIC = window.ULAB_TOPIC || "";
+var KEY = "ulab_ach";
+var STEPS = ["life","guess","story","principle","lab","chaos","myth","quiz","diag","next"];
+var T = {reg:"迴歸分析", km:"K-means 分群", dt:"決策樹", vz:"資料視覺化"};
+var COLOR = {reg:"#17798E", km:"#2A78D6", dt:"#C7391F", vz:"#B26A00"};
+var TOPICS = ["reg","km","dt","vz"];
+
+// 徽章清單：每主題 3 個＋跨主題 4 個（顯示在牆上）；hidden＝彩蛋
+// name＝成就名（諧音梗）、desc＝怎麼拿、quip＝解鎖時的吐槽（要跟該主題內容有關）
+var LIST = [
+ {id:"reg_steps", t:"reg", icon:"🧭", name:"浪子迴歸", desc:"把「迴歸分析」十步都走過一遍", quip:"十步走完，殘差越來越小。媽媽說你終於回到那條線上了。"},
+ {id:"reg_chaos", t:"reg", icon:"🧨", name:"離群索居", desc:"在「迴歸分析」的搞亂資料按 3 次以上", quip:"你親手丟了離群值。迴歸線被拉到懷疑人生，r 已經在角落哭了。"},
+ {id:"reg_quiz",  t:"reg", icon:"🍦", name:"迴歸正傳", desc:"做完「迴歸分析」的測驗", quip:"玩夠了，迴歸正傳。順帶一提：冰淇淋到現在還是沒有害任何人溺水。"},
+ {id:"km_steps",  t:"km",  icon:"🫂", name:"終於合群", desc:"把「K-means 分群」十步都走過一遍", quip:"十步走完，你終於被分進一群了：「認真學習」那群。質心就是你本人。"},
+ {id:"km_chaos",  t:"km",  icon:"👹", name:"群魔亂舞", desc:"在「K-means 分群」的搞亂資料按 3 次以上", quip:"資料都被你搞成這樣了，K-means 還是乖乖切出 K 群。它不會拒絕你，這就是問題所在。"},
+ {id:"km_quiz",   t:"km",  icon:"💘", name:"質心不改", desc:"做完「K-means 分群」的測驗", quip:"質心搬了好幾次家，你的心一次都沒動。測驗完成。"},
+ {id:"dt_steps",  t:"dt",  icon:"🍂", name:"葉落歸根", desc:"把「決策樹」十步都走過一遍", quip:"從根節點一路問到葉節點，最後的預測是：今晚去夜市。"},
+ {id:"dt_chaos",  t:"dt",  icon:"🫣", name:"我很不純", desc:"在「決策樹」的搞亂資料按 3 次以上", quip:"Gini 不純度最高 0.5，你的不純度已經超出量表。"},
+ {id:"dt_quiz",   t:"dt",  icon:"✂️", name:"該剪就剪", desc:"做完「決策樹」的測驗", quip:"測驗完成。那些過度配適的念頭都被你剪掉了，樹形很漂亮。"},
+ {id:"vz_steps",  t:"vz",  icon:"🗡️", name:"圖窮匕見", desc:"把「資料視覺化」十步都走過一遍", quip:"十步走完，每一張圖藏的那把刀，你都看到了。"},
+ {id:"vz_chaos",  t:"vz",  icon:"📺", name:"圖不驚人死不休", desc:"在「資料視覺化」的搞亂資料按 3 次以上", quip:"y 軸偷偷從 200 開始？某些新聞台已經在打聽你的聯絡方式。"},
+ {id:"vz_quiz",   t:"vz",  icon:"➗", name:"分母控", desc:"做完「資料視覺化」的測驗", quip:"測驗完成。從今以後看到排行榜，你的第一句話都是：「分母是什麼？」"},
+ {id:"all_open",  icon:"🗺️", name:"四處留情", desc:"四個主題都打開過", quip:"四個主題都點開過了。渣，但是很好學。"},
+ {id:"two_day",   icon:"🔥", name:"一日雙修", desc:"同一天學了兩個不同主題", quip:"一天學兩個主題，你的大腦今天加班，而且沒有加班費。"},
+ {id:"all_quiz",  icon:"🧠", name:"刷題狂魔", desc:"四個主題的測驗都做完", quip:"四個測驗都做完了。適性測驗表示：不知道還能出什麼給你。"},
+ {id:"all_steps", icon:"🏆", name:"數據之神（自封）", desc:"四個主題的十步全部走完", quip:"四十步全部走完。名片可以印「全民數據科學家」了，雖然沒有人會認證。"},
+ {id:"egg_owl",   hidden:1, icon:"🦉", name:"深夜食統", desc:"半夜 0 點到 5 點之間還在學", quip:"半夜還在學統計。晚睡和成績的相關係數，我們今天先不要算。"},
+ {id:"egg_back",  hidden:1, icon:"🔁", name:"迴頭客", desc:"在兩個不同的日子回來學", quip:"你又回來了。這就是傳說中的「迴歸平均」嗎？"},
+ {id:"egg_tutor", hidden:1, icon:"🙋", name:"問題兒童", desc:"問小助教 5 個問題", quip:"問了小助教 5 題。它很開心，但它的薪水沒有變多。"},
+ {id:"egg_chaos", hidden:1, icon:"💣", name:"資料恐怖分子", desc:"各主題的搞亂資料加起來按了 30 次", quip:"累計搞亂資料 30 次。資料保護官已經在路上了。"}
+];
+var BYID = {}; LIST.forEach(function(b){ BYID[b.id]=b; });
+
+// 存不進瀏覽器時（空間滿、無痕、本機開單一檔被擋）改記在記憶體裡：
+// 2026-11-11 修 bug：原本存失敗 → 每次換頁都以為還沒拿過 → 同一個成就一直跳
+var MEM=null, SEEN={};
+function load(){ try{ var v=localStorage.getItem(KEY); if(v!=null && !MEM) return JSON.parse(v)||{}; }catch(e){} return MEM?JSON.parse(MEM):{}; }
+function save(s){ var j=JSON.stringify(s); try{ localStorage.setItem(KEY, j); if(localStorage.getItem(KEY)===j){ MEM=null; return; } }catch(e){} MEM=j; }
+function prog(){ try{ if(window.ULAB && ULAB.progress) return ULAB.progress()||{}; }catch(e){}
+  try{ return JSON.parse(localStorage.getItem("ulab_progress")) || {}; }catch(e){ return {}; } }
+var S = load(); S.got=S.got||{}; S.days=S.days||{}; S.chaos=S.chaos||{}; S.tutor=S.tutor||0;
+function today(){ var d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+
+/* ---------- 解鎖＋提示 ---------- */
+var queue=[], showing=false;
+function unlock(id){
+  if(SEEN[id] || !BYID[id]) return;          // 這一頁已經跳過就不再跳（就算存檔失敗也一樣）
+  S=load(); S.got=S.got||{};
+  if(S.got[id]){ SEEN[id]=1; return; }
+  SEEN[id]=1;
+  S.got[id]=new Date().toISOString(); save(S);
+  try{ if(window.ULAB) ULAB.ev("achievement",{ach:id}); }catch(e){}
+  queue.push(BYID[id]); if(!showing) next();
+  setTimeout(check, 0);   // 可能連帶解鎖跨主題成就（不要直接遞迴呼叫）
+}
+/* ---------- 解鎖音效：兩個小小的「叮～叮」（不吵，0.4 秒） ---------- */
+var AC=null;
+function ding(egg){
+  try{
+    var C=window.AudioContext||window.webkitAudioContext; if(!C) return;
+    AC=AC||new C(); if(AC.state==="suspended") AC.resume();
+    var t=AC.currentTime+0.02, notes=egg?[784,1175,1568]:[988,1319];   // 彩蛋多一個音
+    notes.forEach(function(f,i){
+      var o=AC.createOscillator(), g=AC.createGain(), s=t+i*0.11;
+      o.type="triangle"; o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,s); g.gain.exponentialRampToValueAtTime(0.13,s+0.015); g.gain.exponentialRampToValueAtTime(0.0001,s+0.32);
+      o.connect(g); g.connect(AC.destination); o.start(s); o.stop(s+0.35);
+    });
+  }catch(e){}
+}
+// 瀏覽器規定要先有點擊才能出聲 → 第一次點擊時先把音效準備好
+document.addEventListener("pointerdown",function(){ try{ var C=window.AudioContext||window.webkitAudioContext; if(C){ AC=AC||new C(); if(AC.state==="suspended") AC.resume(); } }catch(e){} },{once:true,capture:true});
+var css=document.createElement("style");
+// Steam 風：右下角深色小框，從下面滑上來；放在小助教按鈕的上方，不會疊在一起
+css.textContent=".ach-toast{position:fixed;right:18px;bottom:var(--ach-b,22px);z-index:2147483000;width:min(330px,calc(100vw - 36px));display:flex;gap:12px;align-items:flex-start;"+
+  "padding:12px 14px;border-radius:6px;background:linear-gradient(135deg,#2a475e 0%,#1b2838 70%);color:#c7d5e0;border:1px solid #3d6c8d;"+
+  "box-shadow:0 14px 34px -10px rgba(0,0,0,.65);font:400 13px/1.5 'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;"+
+  "transform:translateY(calc(100% + 30px));opacity:0;transition:transform .45s cubic-bezier(.2,.9,.3,1.15),opacity .3s;pointer-events:none;text-align:left;overflow:hidden}"+
+  ".ach-toast.on{transform:none;opacity:1}"+
+  ".ach-toast .i{flex:none;width:52px;height:52px;border-radius:4px;display:grid;place-items:center;font-size:30px;line-height:1;"+
+  "background:radial-gradient(circle at 35% 30%,#4a7ba0,#16222e);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}"+
+  ".ach-toast .tx{min-width:0}.ach-toast small{display:block;font-size:11px;letter-spacing:.06em;color:#8f98a0}"+
+  ".ach-toast b{display:block;color:#fff;font-size:15px;font-weight:800;margin:1px 0 3px}.ach-toast .q{color:#acb8c2;font-size:12.5px}"+
+  ".ach-toast .bar{position:absolute;left:0;bottom:0;height:2px;background:#66c0f4;width:100%;transform-origin:left;animation:ach-bar var(--ach-t,6s) linear forwards}"+
+  "@keyframes ach-bar{to{transform:scaleX(0)}}"+
+  ".ach-toast.egg{background:linear-gradient(135deg,#3b3348 0%,#1f1b27 70%);border-color:#6b5a86}.ach-toast.egg .i{background:radial-gradient(circle at 35% 30%,#7a62a0,#221a2e)}.ach-toast.egg .bar{background:#b48cf2}"+
+  "@media (prefers-reduced-motion:reduce){.ach-toast{transition:none}.ach-toast .bar{animation:none}}";
+document.head.appendChild(css);
+function next(){
+  var b=queue.shift(); if(!b){ showing=false; return; } showing=true;
+  var el=document.createElement("div"), ms=6000;
+  el.className="ach-toast"+(b.hidden?" egg":""); el.setAttribute("role","status");
+  // 用小助教按鈕「最後停的位置」（CSS bottom＋高度），不要用當下位置：按鈕有滑入動畫
+  var fab=document.querySelector(".stt-fab"), fb=fab?parseFloat(getComputedStyle(fab).bottom):NaN;
+  el.style.setProperty("--ach-b", (fab && isFinite(fb) && fab.offsetHeight ? Math.round(fb+fab.offsetHeight+12) : 22)+"px");
+  el.style.setProperty("--ach-t", ms+"ms");
+  el.innerHTML='<span class="i">'+b.icon+'</span><span class="tx"><small>'+(b.hidden?"🥚 隱藏成就已解鎖":"成就已解鎖")+(b.t?"　·　"+T[b.t]:"")+
+    '</small><b>'+b.name+'</b><span class="q">'+b.quip+'</span></span><i class="bar"></i>';
+  document.body.appendChild(el);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ el.classList.add("on"); }); });
+  ding(b.hidden);
+  setTimeout(function(){ el.classList.remove("on"); setTimeout(function(){ el.remove(); next(); }, 450); }, ms);
+}
+
+/* ---------- 判斷 ---------- */
+function check(){
+  S=load(); S.got=S.got||{};
+  var p=prog(), g=S.got;
+  TOPICS.forEach(function(t){
+    var q=p[t]||{};
+    if(STEPS.every(function(s){ return q[s]; })) unlock(t+"_steps");
+  });
+  if(TOPICS.every(function(t){ var q=p[t]; return q && Object.keys(q).length; })) unlock("all_open");
+  if(TOPICS.every(function(t){ return g[t+"_quiz"]; })) unlock("all_quiz");
+  if(TOPICS.every(function(t){ return g[t+"_steps"]; })) unlock("all_steps");
+  var d=S.days||{}, td=today();
+  if(TOPICS.filter(function(t){ return (d[t]||[]).indexOf(td)>=0; }).length>=2) unlock("two_day");
+  var all={}; Object.keys(d).forEach(function(k){ (d[k]||[]).forEach(function(x){ all[x]=1; }); });
+  if(Object.keys(all).length>=2) unlock("egg_back");
+  var c=0; Object.keys(S.chaos||{}).forEach(function(k){ c+=S.chaos[k]; }); if(c>=30) unlock("egg_chaos");
+  if((S.tutor||0)>=5) unlock("egg_tutor");
+}
+function touchDay(){
+  S=load(); S.days=S.days||{};
+  var k=TOPICS.indexOf(TOPIC)>=0?TOPIC:"home", d=S.days[k]=S.days[k]||[], td=today();
+  if(d.indexOf(td)<0){ d.push(td); S.days[k]=d.slice(-30); save(S); }
+  var h=new Date().getHours(); if(h>=0 && h<5) unlock("egg_owl");
+}
+
+/* ---------- 走到 ⑩ 時：大大的「完成了！」框，選回選主題或下一個主題 ---------- */
+var FILE={reg:"regression.html", km:"kmeans.html", dt:"tree.html", vz:"road.html"};
+var ICON={reg:"📈", km:"🎯", dt:"🌳", vz:"📊"};
+var doneShown=false;
+function finishCard(){
+  if(doneShown || document.querySelector(".fin-wrap")) return;
+  var p=prog(), q=p[TOPIC]||{};
+  if(!STEPS.every(function(s){ return q[s]; })) return;
+  doneShown=true;
+  var left=TOPICS.filter(function(t){ var x=p[t]||{}; return t!==TOPIC && !STEPS.every(function(s){ return x[s]; }); });
+  var st=document.createElement("style");
+  // 舊 iPhone（iOS 14.4 以前不支援 inset、Safari 18 以前 backdrop-filter 要加 -webkit-）→ 都寫兩份
+  st.textContent=".fin-wrap{position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147482000;display:grid;place-items:center;padding:16px;background:rgba(20,24,30,.55);"+
+    "-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);-webkit-overflow-scrolling:touch;opacity:0;transition:opacity .3s;font:400 15px/1.6 'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif}"+
+    ".fin-wrap.on{opacity:1}.fin{position:relative;width:min(460px,100%);background:#fffdf8;color:#1f2328;border-radius:22px;padding:30px 26px 22px;text-align:center;"+
+    "box-shadow:0 30px 70px -20px rgba(0,0,0,.55);border-top:8px solid var(--fc);transform:scale(.9) translateY(20px);transition:transform .45s cubic-bezier(.2,.9,.3,1.3)}"+
+    ".fin-wrap.on .fin{transform:none}.fin .big{font-size:54px;line-height:1;margin-bottom:8px}.fin h2{margin:0 0 6px;font-size:24px;font-weight:800;color:var(--fc)}"+
+    ".fin-prog{margin:4px 0 14px}.fin-icons{display:flex;justify-content:center;gap:10px}"+
+    ".fin-icons span{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:#eee;filter:grayscale(1);opacity:.45}"+
+    ".fin-icons span.ok{filter:none;opacity:1;background:#fff;background:color-mix(in srgb,var(--tc) 16%,#fff);box-shadow:0 0 0 2px var(--tc)}"+   // 舊 iOS 不懂 color-mix → 退回白底
+    ".fin-cnt{margin-top:8px;font-size:14px;color:#5b6168}.fin-cnt b{color:var(--fc);font-size:17px}"+
+    ".fin p{margin:0 0 20px;color:#5b6168}.fin .btns{display:grid;gap:10px}"+
+    ".fin a{display:block;padding:14px 16px;border-radius:14px;font-weight:700;font-size:16px;text-decoration:none;transition:transform .15s,filter .15s}"+
+    ".fin a:hover{transform:translateY(-2px);filter:brightness(1.05)}.fin a.go{background:var(--nc);color:#fff;box-shadow:0 8px 18px -8px var(--nc)}"+
+    ".fin a.home{background:#efe9dc;color:#1f2328}.fin .x{position:absolute;top:10px;right:12px;border:0;background:none;font-size:22px;color:#9aa0a6;cursor:pointer;padding:4px 8px}"+
+    ".fin .stay{display:inline-block;margin-top:12px;border:0;background:none;color:#8a9097;font-size:13.5px;cursor:pointer;text-decoration:underline}"+
+    "@media (prefers-reduced-motion:reduce){.fin-wrap,.fin{transition:none}}";
+  document.head.appendChild(st);
+  var w=document.createElement("div"); w.className="fin-wrap"; w.setAttribute("role","dialog"); w.setAttribute("aria-modal","true");
+  var nx=left[0], nDone=TOPICS.length-left.length;
+  // 總進度：四個主題圖示，學完的亮、沒學完的灰（2026-11-11）
+  var dots='<div class="fin-prog"><div class="fin-icons">'+TOPICS.map(function(t){ var ok=left.indexOf(t)<0;
+      return '<span class="'+(ok?'ok':'')+'" title="'+T[t]+(ok?'：完成':'：還沒走完')+'" style="--tc:'+COLOR[t]+'">'+ICON[t]+'</span>'; }).join("")+
+    '</div><div class="fin-cnt">已完成 <b>'+nDone+'</b> / '+TOPICS.length+' 個主題</div></div>';
+  w.innerHTML='<div class="fin" style="--fc:'+COLOR[TOPIC]+';--nc:'+(nx?COLOR[nx]:COLOR[TOPIC])+'">'+
+    '<button class="x" aria-label="關閉">×</button><div class="big">🎉</div>'+
+    '<h2>「'+T[TOPIC]+'」完成了！</h2>'+
+    dots+
+    '<p>'+(nx?'十步全部走完，還有 '+left.length+' 個主題等你。接下來想做什麼？':'十步全部走完，四個主題你都學完了，太強了！')+'</p>'+
+    '<div class="btns">'+
+    (nx?'<a class="go" href="'+FILE[nx]+'">'+ICON[nx]+' 繼續學下一個：'+T[nx]+' →</a>':'')+
+    '<a class="home" href="index.html">← 回到選主題頁'+(nx?'':'，看看我的成就 🏅')+'</a></div>'+
+    '<button class="stay">先留在這頁，看看下一步建議</button></div>';
+  document.body.appendChild(w);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ w.classList.add("on"); }); });
+  function close(){ w.classList.remove("on"); setTimeout(function(){ w.remove(); },300); document.removeEventListener("keydown",esc); }
+  function esc(e){ if(e.key==="Escape") close(); }
+  w.querySelector(".x").onclick=close; w.querySelector(".stay").onclick=close;
+  w.addEventListener("click",function(e){ if(e.target===w) close(); });
+  document.addEventListener("keydown",esc);
+  try{ if(window.ULAB) ULAB.ev("topic_finish_card",{next:nx||""}); }catch(e){}
+}
+
+/* ---------- 主題頁：偵測搞亂資料、測驗完成、小助教 ---------- */
+if(TOPICS.indexOf(TOPIC)>=0){
+  var cur=window.STT_STATION||"";
+  window.addEventListener("stt-station",function(e){ cur=e.detail; setTimeout(check,50); if(cur==="next") setTimeout(finishCard,700); });
+  if(cur==="next") setTimeout(finishCard,1200);
+  // 搞亂資料：在 ⑥ 那一站按頁面裡的按鈕（導覽、小助教不算）；資料視覺化 ⑤⑥ 同一段 → 看是不是點在紅框 .chaosbar 裡
+  document.addEventListener("click",function(e){
+    var b=e.target.closest && e.target.closest("button,input[type=range],input[type=checkbox],select,[role=button]");
+    // 注意：分頁導覽.js 會在 <body> 加 class="pg-on"，pg- 開頭的規則不能算到 body，不然整頁都被略過（2026-11-11 修：迴歸、視覺化搞亂成就拿不到）
+    if(!b || b.closest("nav,header,footer,.stt,.stt-fab,#stationnav,:not(body):not(html)[class^='pg-'],:not(body):not(html)[class*=' pg-'],.ach-toast,.fin-wrap")) return;
+    var inChaos = TOPIC==="vz" ? !!b.closest(".chaosbar") : cur==="chaos";
+    if(!inChaos) return;
+    S=load(); S.chaos=S.chaos||{}; S.chaos[TOPIC]=(S.chaos[TOPIC]||0)+1; save(S);
+    if(S.chaos[TOPIC]>=3) unlock(TOPIC+"_chaos");
+    check();
+  },true);
+  // 測驗完成：各主題結果畫面出現的樣子不同，每 2 秒看一次（很省）
+  var DONE={
+    reg:function(){ var v=document.getElementById("vResult"); return v && !v.hidden && v.children.length; },
+    km:function(){ return document.querySelector("#cat-app h2.cat-h"); },
+    dt:function(){ return document.querySelector("#cat-root #to-diag"); },
+    vz:function(){ var a=document.getElementById("qDone"), b=document.getElementById("pDone");
+      return (a && a.style.display==="block") || (b && b.style.display==="block"); }
+  };
+  setInterval(function(){ if(!(load().got||{})[TOPIC+"_quiz"] && DONE[TOPIC]()) unlock(TOPIC+"_quiz"); }, 2000);
+}
+// 小助教：數「我問的」訊息（每一頁都有小助教，包含選主題頁）
+(function watchTutor(n){
+  var logEl=document.querySelector(".stt .stt-log");
+  if(!logEl){ if(n<20) setTimeout(function(){ watchTutor(n+1); }, 1000); return; }
+  new MutationObserver(function(ms){
+    var k=0; ms.forEach(function(m){ m.addedNodes.forEach(function(x){ if(x.classList && x.classList.contains("me")) k++; }); });
+    if(!k) return; S=load(); S.tutor=(S.tutor||0)+k; save(S); check();
+  }).observe(logEl,{childList:true});
+})(0);
+
+/* ---------- 選主題頁：徽章牆 ---------- */
+function wall(){
+  var host=document.querySelector(".flow"); if(!host) return;
+  var g=load().got||{}, shown=LIST.filter(function(b){ return !b.hidden; }), eggs=LIST.filter(function(b){ return b.hidden; });
+  var n=shown.filter(function(b){ return g[b.id]; }).length, ne=eggs.filter(function(b){ return g[b.id]; }).length;
+  var st=document.createElement("style");
+  st.textContent=".ach-wall{margin:34px 0 0;border:1.5px solid var(--line);border-radius:18px;background:var(--card);padding:6px 20px}"+
+    ".ach-wall summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:14px;padding:12px 0;font-weight:700}"+
+    ".ach-wall summary::-webkit-details-marker{display:none}.ach-wall summary .mini{display:flex;gap:3px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}"+
+    ".ach-wall summary .mini i{width:9px;height:9px;border-radius:50%;background:var(--line)}.ach-wall summary .mini i.on{background:var(--gold)}"+
+    ".ach-wall summary .cnt{color:var(--soft);font-weight:500;font-size:14px}.ach-wall summary .cnt b{color:var(--gold)}"+
+    ".ach-wall summary .arr{color:var(--faint);font-size:13px;font-weight:500}.ach-wall[open] summary .arr::after{content:'收起'}.ach-wall:not([open]) summary .arr::after{content:'展開'}"+
+    ".ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;padding:4px 0 18px}"+
+    ".ach-b{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--line);font-size:13.5px;line-height:1.4}"+
+    ".ach-b .i{font-size:24px;width:30px;text-align:center}.ach-b b{display:block;font-size:14px}.ach-b span{color:var(--soft)}"+
+    ".ach-b.off .i{filter:grayscale(1);opacity:.35}.ach-b.off b{color:var(--faint)}.ach-b.on{border-color:var(--c,var(--gold));background:rgba(255,200,0,.06);background:color-mix(in srgb,var(--c,var(--gold)) 7%,transparent)}"+
+    ".ach-b em{display:block;font-style:normal;font-size:12px;color:var(--faint);margin-top:4px}"+
+    ".ach-grp{grid-column:1/-1;font-size:12.5px;font-weight:700;letter-spacing:.08em;color:var(--faint);margin:8px 0 -2px}"+
+    ".ach-egg{display:inline;cursor:default;opacity:.55}.ach-egg:hover{opacity:.9}";
+  document.head.appendChild(st);
+  var d=document.createElement("details"); d.className="ach-wall";
+  var h='<summary>🏅 我的成就 <span class="cnt"><b>'+n+'</b> / '+shown.length+'</span><span class="mini" aria-hidden="true">'+
+    shown.map(function(b){ return '<i class="'+(g[b.id]?"on":"")+'"></i>'; }).join("")+'</span><span class="arr"></span></summary><div class="ach-grid">';
+  TOPICS.concat(["all"]).forEach(function(t){
+    h+='<div class="ach-grp">'+(t==="all"?"跨主題":T[t])+'</div>';
+    shown.filter(function(b){ return (b.t||"all")===t; }).forEach(function(b){
+      h+='<div class="ach-b '+(g[b.id]?"on":"off")+'"'+(b.t?' style="--c:var(--'+b.t+')"':'')+' title="'+(g[b.id]?b.quip:"")+'"><span class="i">'+b.icon+'</span><span><b>'+b.name+'</b><span>'+b.desc+'</span>'+
+        (g[b.id]?'<em>「'+b.quip+'」</em>':'')+'</span></div>';
+    });
+  });
+  h+='</div><p style="margin:-6px 0 14px;font-size:12.5px;color:var(--faint)">成就只記在這台電腦的瀏覽器裡，換電腦或清除瀏覽紀錄會重新開始。</p>';
+  d.innerHTML=h;
+  host.parentNode.insertBefore(d, host.nextSibling);
+  if(n && sessionStorageGet("ach_open")) d.open=true;
+  d.addEventListener("toggle",function(){ try{ sessionStorage.setItem("ach_open", d.open?"1":""); }catch(e){} });
+  // 彩蛋：頁尾一行很淡的字
+  var f=document.querySelector("footer");
+  if(f){ var s=document.createElement("span"); s.className="ach-egg";
+    var found=eggs.filter(function(b){ return g[b.id]; });
+    s.textContent="　·　"+(ne?"🥚 "+found.map(function(b){ return b.icon; }).join(" ")+"　彩蛋 "+ne+" / "+eggs.length:"這裡藏著 "+eggs.length+" 顆小彩蛋");
+    s.title=ne?found.map(function(b){ return b.name+"："+b.desc; }).join("\n"):"到處逛逛、多回來幾次，也許就會遇到";
+    f.appendChild(s); }
+}
+function sessionStorageGet(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } }
+
+touchDay();
+check();
+if(TOPIC==="home") wall();
+window.ULAB_ACH={list:LIST, state:load, unlock:unlock, check:check};
+})();
+</script>
+</body>
+</html>

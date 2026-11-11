@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>全民數據科學實驗室</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F1EA; --card:#FFFFFF; --ink:#1F2328; --soft:#5B6168; --faint:#8C9298; --line:#E2DED5;
+  --reg:#17798E; --reg-lt:#E2F1F5;
+  --km:#2A78D6;  --km-lt:#E4EEFB;
+  --dt:#C7391F;  --dt-lt:#F8E5DF;
+  --vz:#B26A00;  --vz-lt:#FBEFD9;
+  --gold:#B88412;
+  --sans:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif;
+  --serif:'Noto Serif TC','PMingLiU',serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15181D; --card:#1E2228; --ink:#ECEEF0; --soft:#B3B9C0; --faint:#7D848C; --line:#2E333B;
+  --reg:#5BC0D3; --reg-lt:#173238; --km:#6EA8F0; --km-lt:#1A2A40; --dt:#EE7A5C; --dt-lt:#3A2119; --vz:#F0B24A; --vz-lt:#3A2C14; --gold:#E0AC4D;}}
+:root[data-theme="dark"]{
+  --bg:#15181D; --card:#1E2228; --ink:#ECEEF0; --soft:#B3B9C0; --faint:#7D848C; --line:#2E333B;
+  --reg:#5BC0D3; --reg-lt:#173238; --km:#6EA8F0; --km-lt:#1A2A40; --dt:#EE7A5C; --dt-lt:#3A2119; --vz:#F0B24A; --vz-lt:#3A2C14; --gold:#E0AC4D;}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.7;font-size:16px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+
+header{padding:64px 0 34px}
+.brand{font-size:14px;font-weight:700;letter-spacing:.14em;color:var(--soft)}
+h1{font-family:var(--serif);font-weight:900;font-size:clamp(32px,6vw,50px);line-height:1.2;margin:10px 0 0}
+
+/* 主題卡 */
+.topics{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+@media (max-width:720px){.topics{grid-template-columns:1fr}}
+.topic{--c:var(--ink);--lt:var(--line);position:relative;display:flex;flex-direction:column;background:var(--card);
+  border:1.5px solid var(--line);border-radius:20px;overflow:hidden;text-decoration:none;color:inherit;
+  transition:transform .18s,border-color .18s,box-shadow .18s}
+a.topic:hover{transform:translateY(-3px);border-color:var(--c);box-shadow:0 12px 28px -16px rgba(0,0,0,.4)}
+.topic.reg{--c:var(--reg);--lt:var(--reg-lt)} .topic.km{--c:var(--km);--lt:var(--km-lt)} .topic.dt{--c:var(--dt);--lt:var(--dt-lt)} .topic.vz{--c:var(--vz);--lt:var(--vz-lt)}
+.art{background:var(--lt);height:160px;display:grid;place-items:center}
+.art svg{width:200px;height:120px}
+.body{padding:22px 24px 22px;display:flex;flex-direction:column;flex:1}
+.method{font-family:var(--serif);font-weight:900;font-size:clamp(30px,4.2vw,38px);line-height:1.15;color:var(--c);margin:0;letter-spacing:.01em}
+.q{margin:10px 0 20px;font-size:17px;color:var(--soft)}
+.go{margin-top:auto;font-weight:700;color:var(--c)}
+.last{position:absolute;top:14px;right:14px;background:var(--card);color:var(--c);border:1.5px solid var(--c);
+  font-size:12px;font-weight:700;border-radius:99px;padding:1px 10px}
+.order{position:absolute;top:14px;left:14px;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--c)}
+.order i{font-style:normal;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--c);color:var(--card);font-size:14px}
+.rec{margin:12px 0 0;font-size:16px;color:var(--soft)}
+.rec b{color:var(--ink)}
+/* 各主題走到第幾步（上線版各頁的 共用追蹤.js 寫進 localStorage "ulab_progress"） */
+.prog{display:flex;align-items:center;gap:10px;margin:-8px 0 16px;font-size:13px;color:var(--soft)}
+.prog .bar{flex:1;height:6px;border-radius:99px;background:var(--lt);overflow:hidden}
+.prog .bar i{display:block;height:100%;background:var(--c);border-radius:99px}
+.prog b{color:var(--c)}
+.topic.soon{border-style:dashed;background:transparent}
+.topic.soon .art{background:transparent;border-bottom:1.5px dashed var(--line)}
+.topic.soon .method,.topic.soon .go{color:var(--faint)}
+
+/* 十步：一行 */
+.flow{margin:40px 0 0;font-size:14px;color:var(--faint);line-height:2}
+.flow b{color:var(--soft);font-weight:700;margin-right:6px}
+.flow span+span::before{content:"→";margin:0 7px;opacity:.6}
+
+footer{margin:36px 0 0;padding:18px 0 40px;border-top:1px solid var(--line);font-size:13px;color:var(--faint)}
+@media (max-width:560px){header{padding:40px 0 24px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>/* iOS 防自動放大（做上線版.py 加的） */@supports (-webkit-touch-callout:none){input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]),textarea,select{font-size:16px!important}}</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand">全民數據科學實驗室</div>
+  <h1>今天想學哪一個？</h1>
+  <p class="rec">第一次來，建議照 <b>① → ② → ③</b> 的順序：先學迴歸看懂散佈圖，再學分群，最後學決策樹；④ 資料視覺化隨時都可以學。</p>
+</header>
+
+<main class="topics" aria-label="學習主題">
+  <a class="topic reg" data-t="reg" href="regression.html">
+    <span class="order"><i>1</i>推薦先學</span>
+    <div class="art" aria-hidden="true">
+      <svg viewBox="0 0 200 120">
+        <g fill="var(--reg)" opacity=".75">
+          <circle cx="22" cy="92" r="5"/><circle cx="40" cy="78" r="5"/><circle cx="55" cy="86" r="5"/><circle cx="72" cy="64" r="5"/>
+          <circle cx="90" cy="70" r="5"/><circle cx="106" cy="50" r="5"/><circle cx="124" cy="56" r="5"/><circle cx="142" cy="36" r="5"/>
+          <circle cx="160" cy="40" r="5"/><circle cx="178" cy="22" r="5"/></g>
+        <line x1="14" y1="98" x2="186" y2="20" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="body">
+      <h2 class="method">迴歸分析</h2>
+      <p class="q">房價真的讓大家不敢生小孩嗎？</p>
+      <span class="go">開始學 →</span>
+    </div>
+  </a>
+
+  <a class="topic km" data-t="km" href="kmeans.html">
+    <span class="order"><i>2</i></span>
+    <div class="art" aria-hidden="true">
+      <svg viewBox="0 0 200 120">
+        <g fill="var(--km)" opacity=".8"><circle cx="40" cy="36" r="5"/><circle cx="52" cy="28" r="5"/><circle cx="30" cy="48" r="5"/><circle cx="50" cy="48" r="5"/><circle cx="62" cy="40" r="5"/></g>
+        <g fill="var(--dt)" opacity=".8"><circle cx="140" cy="30" r="5"/><circle cx="154" cy="40" r="5"/><circle cx="166" cy="28" r="5"/><circle cx="150" cy="22" r="5"/><circle cx="162" cy="46" r="5"/></g>
+        <g fill="var(--gold)" opacity=".85"><circle cx="90" cy="88" r="5"/><circle cx="104" cy="98" r="5"/><circle cx="116" cy="86" r="5"/><circle cx="98" cy="78" r="5"/><circle cx="112" cy="104" r="5"/></g>
+        <g fill="var(--ink)"><rect x="41" y="34" width="10" height="10" transform="rotate(45 46 39)"/><rect x="148" y="29" width="10" height="10" transform="rotate(45 153 34)"/><rect x="99" y="86" width="10" height="10" transform="rotate(45 104 91)"/></g>
+      </svg>
+    </div>
+    <div class="body">
+      <h2 class="method">K-means 分群</h2>
+      <p class="q">你住的那一區，是「哪一種區」？</p>
+      <span class="go">開始學 →</span>
+    </div>
+  </a>
+
+  <a class="topic dt" data-t="dt" href="tree.html">
+    <span class="order"><i>3</i></span>
+    <div class="art" aria-hidden="true">
+      <svg viewBox="0 0 200 120" fill="none" stroke-linecap="round">
+        <g stroke="var(--ink)" stroke-width="2.5"><path d="M100 26 L56 62 M100 26 L144 62 M56 62 L34 98 M56 62 L78 98 M144 62 L166 98"/></g>
+        <rect x="80" y="14" width="40" height="22" rx="6" fill="var(--dt)"/>
+        <rect x="38" y="52" width="36" height="20" rx="6" fill="var(--dt)" opacity=".7"/>
+        <rect x="126" y="52" width="36" height="20" rx="6" fill="var(--dt)" opacity=".7"/>
+        <g fill="var(--card)" stroke="var(--dt)" stroke-width="2.5"><circle cx="34" cy="100" r="8"/><circle cx="78" cy="100" r="8"/><circle cx="166" cy="100" r="8"/></g>
+      </svg>
+    </div>
+    <div class="body">
+      <h2 class="method">決策樹</h2>
+      <p class="q">今晚的夜市，要多熱鬧？</p>
+      <span class="go">開始學 →</span>
+    </div>
+  </a>
+
+  <a class="topic vz" data-t="vz" href="road.html">
+    <span class="order"><i>4</i></span>
+    <div class="art" aria-hidden="true">
+      <svg viewBox="0 0 200 120">
+        <g fill="var(--vz)"><rect x="30" y="70" width="22" height="34" rx="3" opacity=".55"/><rect x="62" y="52" width="22" height="52" rx="3" opacity=".7"/>
+          <rect x="94" y="30" width="22" height="74" rx="3"/><rect x="126" y="60" width="22" height="44" rx="3" opacity=".6"/></g>
+        <line x1="22" y1="104" x2="160" y2="104" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/>
+        <g transform="translate(160 26)" stroke="var(--ink)" stroke-width="3" fill="var(--card)"><circle r="13"/><line x1="9" y1="9" x2="22" y2="22" stroke-linecap="round"/></g>
+      </svg>
+    </div>
+    <div class="body">
+      <h2 class="method">資料視覺化</h2>
+      <p class="q">哪個縣市的馬路最危險？圖會不會騙人？</p>
+      <span class="go">開始學 →</span>
+    </div>
+  </a>
+</main>
+
+<p class="flow"><b>每個主題都走十步：</b><span>生活問題</span><span>先猜答案</span><span>故事動畫</span><span>核心原理</span><span>互動實驗</span><span>搞亂資料</span><span>迷思破解</span><span>學習挑戰</span><span>學習診斷</span><span>下一步建議</span></p>
+
+<footer>全民數據科學實驗室</footer>
+</div>
+
+<script>
+// 記住上次點了哪個主題（只存在這台瀏覽器；讀寫失敗就略過）
+(function(){
+  var last=null; try{last=localStorage.getItem("lab_last_topic");}catch(e){}
+  document.querySelectorAll(".topic[data-t]").forEach(function(c){
+    if(c.dataset.t===last){var s=document.createElement("span");s.className="last";s.textContent="上次學到這裡";c.appendChild(s);}
+    c.addEventListener("click",function(){try{localStorage.setItem("lab_last_topic",c.dataset.t);}catch(e){}});
+  });
+  // 每張卡顯示「已走 n / 10 步」；還沒開始的主題不顯示
+  var prog={}; try{prog=JSON.parse(localStorage.getItem("ulab_progress"))||{};}catch(e){}
+  var STEPS=["life","guess","story","principle","lab","chaos","myth","quiz","diag","next"];
+  document.querySelectorAll(".topic[data-t]").forEach(function(c){
+    var p=prog[c.dataset.t]; if(!p) return;
+    var n=STEPS.filter(function(s){return p[s];}).length; if(!n) return;
+    var d=document.createElement("div"); d.className="prog";
+    d.innerHTML='<span class="bar"><i style="width:'+(n*10)+'%"></i></span><span>'+(n>=10?'<b>十步都走過了 ✓</b>':'已走 <b>'+n+'</b> / 10 步')+'</span>';
+    var go=c.querySelector(".go"); go.parentNode.insertBefore(d,go);
+    go.textContent = n<10 ? "繼續學 →" : "再複習一次 →";
+  });
+})();
+</script>
+<script src="tutor.js" data-topic="home"></script>
+<script>window.ULAB_TOPIC="home";</script>
+<script>/* ============================================================
+   成就系統（輕量版，2026-11-10）
+   - 做上線版.py 插進各主題頁（ULAB_TOPIC＝reg|km|dt|vz）與選主題頁（ULAB_TOPIC＝home）；原始檔不動
+   - 只存在這台瀏覽器：localStorage "ulab_ach"（換電腦／清瀏覽資料就歸零）
+   - 主題頁：偵測到就跳一個小提示；選主題頁：畫「我的成就」徽章牆
+   - 隱藏彩蛋：牆上不列出，只在頁尾用很淡的一行字顯示找到幾個
+   ============================================================ */
+(function(){
+"use strict";
+var TOPIC = window.ULAB_TOPIC || "";
+var KEY = "ulab_ach";
+var STEPS = ["life","guess","story","principle","lab","chaos","myth","quiz","diag","next"];
+var T = {reg:"迴歸分析", km:"K-means 分群", dt:"決策樹", vz:"資料視覺化"};
+var COLOR = {reg:"#17798E", km:"#2A78D6", dt:"#C7391F", vz:"#B26A00"};
+var TOPICS = ["reg","km","dt","vz"];
+
+// 徽章清單：每主題 3 個＋跨主題 4 個（顯示在牆上）；hidden＝彩蛋
+// name＝成就名（諧音梗）、desc＝怎麼拿、quip＝解鎖時的吐槽（要跟該主題內容有關）
+var LIST = [
+ {id:"reg_steps", t:"reg", icon:"🧭", name:"浪子迴歸", desc:"把「迴歸分析」十步都走過一遍", quip:"十步走完，殘差越來越小。媽媽說你終於回到那條線上了。"},
+ {id:"reg_chaos", t:"reg", icon:"🧨", name:"離群索居", desc:"在「迴歸分析」的搞亂資料按 3 次以上", quip:"你親手丟了離群值。迴歸線被拉到懷疑人生，r 已經在角落哭了。"},
+ {id:"reg_quiz",  t:"reg", icon:"🍦", name:"迴歸正傳", desc:"做完「迴歸分析」的測驗", quip:"玩夠了，迴歸正傳。順帶一提：冰淇淋到現在還是沒有害任何人溺水。"},
+ {id:"km_steps",  t:"km",  icon:"🫂", name:"終於合群", desc:"把「K-means 分群」十步都走過一遍", quip:"十步走完，你終於被分進一群了：「認真學習」那群。質心就是你本人。"},
+ {id:"km_chaos",  t:"km",  icon:"👹", name:"群魔亂舞", desc:"在「K-means 分群」的搞亂資料按 3 次以上", quip:"資料都被你搞成這樣了，K-means 還是乖乖切出 K 群。它不會拒絕你，這就是問題所在。"},
+ {id:"km_quiz",   t:"km",  icon:"💘", name:"質心不改", desc:"做完「K-means 分群」的測驗", quip:"質心搬了好幾次家，你的心一次都沒動。測驗完成。"},
+ {id:"dt_steps",  t:"dt",  icon:"🍂", name:"葉落歸根", desc:"把「決策樹」十步都走過一遍", quip:"從根節點一路問到葉節點，最後的預測是：今晚去夜市。"},
+ {id:"dt_chaos",  t:"dt",  icon:"🫣", name:"我很不純", desc:"在「決策樹」的搞亂資料按 3 次以上", quip:"Gini 不純度最高 0.5，你的不純度已經超出量表。"},
+ {id:"dt_quiz",   t:"dt",  icon:"✂️", name:"該剪就剪", desc:"做完「決策樹」的測驗", quip:"測驗完成。那些過度配適的念頭都被你剪掉了，樹形很漂亮。"},
+ {id:"vz_steps",  t:"vz",  icon:"🗡️", name:"圖窮匕見", desc:"把「資料視覺化」十步都走過一遍", quip:"十步走完，每一張圖藏的那把刀，你都看到了。"},
+ {id:"vz_chaos",  t:"vz",  icon:"📺", name:"圖不驚人死不休", desc:"在「資料視覺化」的搞亂資料按 3 次以上", quip:"y 軸偷偷從 200 開始？某些新聞台已經在打聽你的聯絡方式。"},
+ {id:"vz_quiz",   t:"vz",  icon:"➗", name:"分母控", desc:"做完「資料視覺化」的測驗", quip:"測驗完成。從今以後看到排行榜，你的第一句話都是：「分母是什麼？」"},
+ {id:"all_open",  icon:"🗺️", name:"四處留情", desc:"四個主題都打開過", quip:"四個主題都點開過了。渣，但是很好學。"},
+ {id:"two_day",   icon:"🔥", name:"一日雙修", desc:"同一天學了兩個不同主題", quip:"一天學兩個主題，你的大腦今天加班，而且沒有加班費。"},
+ {id:"all_quiz",  icon:"🧠", name:"刷題狂魔", desc:"四個主題的測驗都做完", quip:"四個測驗都做完了。適性測驗表示：不知道還能出什麼給你。"},
+ {id:"all_steps", icon:"🏆", name:"數據之神（自封）", desc:"四個主題的十步全部走完", quip:"四十步全部走完。名片可以印「全民數據科學家」了，雖然沒有人會認證。"},
+ {id:"egg_owl",   hidden:1, icon:"🦉", name:"深夜食統", desc:"半夜 0 點到 5 點之間還在學", quip:"半夜還在學統計。晚睡和成績的相關係數，我們今天先不要算。"},
+ {id:"egg_back",  hidden:1, icon:"🔁", name:"迴頭客", desc:"在兩個不同的日子回來學", quip:"你又回來了。這就是傳說中的「迴歸平均」嗎？"},
+ {id:"egg_tutor", hidden:1, icon:"🙋", name:"問題兒童", desc:"問小助教 5 個問題", quip:"問了小助教 5 題。它很開心，但它的薪水沒有變多。"},
+ {id:"egg_chaos", hidden:1, icon:"💣", name:"資料恐怖分子", desc:"各主題的搞亂資料加起來按了 30 次", quip:"累計搞亂資料 30 次。資料保護官已經在路上了。"}
+];
+var BYID = {}; LIST.forEach(function(b){ BYID[b.id]=b; });
+
+// 存不進瀏覽器時（空間滿、無痕、本機開單一檔被擋）改記在記憶體裡：
+// 2026-11-11 修 bug：原本存失敗 → 每次換頁都以為還沒拿過 → 同一個成就一直跳
+var MEM=null, SEEN={};
+function load(){ try{ var v=localStorage.getItem(KEY); if(v!=null && !MEM) return JSON.parse(v)||{}; }catch(e){} return MEM?JSON.parse(MEM):{}; }
+function save(s){ var j=JSON.stringify(s); try{ localStorage.setItem(KEY, j); if(localStorage.getItem(KEY)===j){ MEM=null; return; } }catch(e){} MEM=j; }
+function prog(){ try{ if(window.ULAB && ULAB.progress) return ULAB.progress()||{}; }catch(e){}
+  try{ return JSON.parse(localStorage.getItem("ulab_progress")) || {}; }catch(e){ return {}; } }
+var S = load(); S.got=S.got||{}; S.days=S.days||{}; S.chaos=S.chaos||{}; S.tutor=S.tutor||0;
+function today(){ var d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+
+/* ---------- 解鎖＋提示 ---------- */
+var queue=[], showing=false;
+function unlock(id){
+  if(SEEN[id] || !BYID[id]) return;          // 這一頁已經跳過就不再跳（就算存檔失敗也一樣）
+  S=load(); S.got=S.got||{};
+  if(S.got[id]){ SEEN[id]=1; return; }
+  SEEN[id]=1;
+  S.got[id]=new Date().toISOString(); save(S);
+  try{ if(window.ULAB) ULAB.ev("achievement",{ach:id}); }catch(e){}
+  queue.push(BYID[id]); if(!showing) next();
+  setTimeout(check, 0);   // 可能連帶解鎖跨主題成就（不要直接遞迴呼叫）
+}
+/* ---------- 解鎖音效：兩個小小的「叮～叮」（不吵，0.4 秒） ---------- */
+var AC=null;
+function ding(egg){
+  try{
+    var C=window.AudioContext||window.webkitAudioContext; if(!C) return;
+    AC=AC||new C(); if(AC.state==="suspended") AC.resume();
+    var t=AC.currentTime+0.02, notes=egg?[784,1175,1568]:[988,1319];   // 彩蛋多一個音
+    notes.forEach(function(f,i){
+      var o=AC.createOscillator(), g=AC.createGain(), s=t+i*0.11;
+      o.type="triangle"; o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,s); g.gain.exponentialRampToValueAtTime(0.13,s+0.015); g.gain.exponentialRampToValueAtTime(0.0001,s+0.32);
+      o.connect(g); g.connect(AC.destination); o.start(s); o.stop(s+0.35);
+    });
+  }catch(e){}
+}
+// 瀏覽器規定要先有點擊才能出聲 → 第一次點擊時先把音效準備好
+document.addEventListener("pointerdown",function(){ try{ var C=window.AudioContext||window.webkitAudioContext; if(C){ AC=AC||new C(); if(AC.state==="suspended") AC.resume(); } }catch(e){} },{once:true,capture:true});
+var css=document.createElement("style");
+// Steam 風：右下角深色小框，從下面滑上來；放在小助教按鈕的上方，不會疊在一起
+css.textContent=".ach-toast{position:fixed;right:18px;bottom:var(--ach-b,22px);z-index:2147483000;width:min(330px,calc(100vw - 36px));display:flex;gap:12px;align-items:flex-start;"+
+  "padding:12px 14px;border-radius:6px;background:linear-gradient(135deg,#2a475e 0%,#1b2838 70%);color:#c7d5e0;border:1px solid #3d6c8d;"+
+  "box-shadow:0 14px 34px -10px rgba(0,0,0,.65);font:400 13px/1.5 'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;"+
+  "transform:translateY(calc(100% + 30px));opacity:0;transition:transform .45s cubic-bezier(.2,.9,.3,1.15),opacity .3s;pointer-events:none;text-align:left;overflow:hidden}"+
+  ".ach-toast.on{transform:none;opacity:1}"+
+  ".ach-toast .i{flex:none;width:52px;height:52px;border-radius:4px;display:grid;place-items:center;font-size:30px;line-height:1;"+
+  "background:radial-gradient(circle at 35% 30%,#4a7ba0,#16222e);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}"+
+  ".ach-toast .tx{min-width:0}.ach-toast small{display:block;font-size:11px;letter-spacing:.06em;color:#8f98a0}"+
+  ".ach-toast b{display:block;color:#fff;font-size:15px;font-weight:800;margin:1px 0 3px}.ach-toast .q{color:#acb8c2;font-size:12.5px}"+
+  ".ach-toast .bar{position:absolute;left:0;bottom:0;height:2px;background:#66c0f4;width:100%;transform-origin:left;animation:ach-bar var(--ach-t,6s) linear forwards}"+
+  "@keyframes ach-bar{to{transform:scaleX(0)}}"+
+  ".ach-toast.egg{background:linear-gradient(135deg,#3b3348 0%,#1f1b27 70%);border-color:#6b5a86}.ach-toast.egg .i{background:radial-gradient(circle at 35% 30%,#7a62a0,#221a2e)}.ach-toast.egg .bar{background:#b48cf2}"+
+  "@media (prefers-reduced-motion:reduce){.ach-toast{transition:none}.ach-toast .bar{animation:none}}";
+document.head.appendChild(css);
+function next(){
+  var b=queue.shift(); if(!b){ showing=false; return; } showing=true;
+  var el=document.createElement("div"), ms=6000;
+  el.className="ach-toast"+(b.hidden?" egg":""); el.setAttribute("role","status");
+  // 用小助教按鈕「最後停的位置」（CSS bottom＋高度），不要用當下位置：按鈕有滑入動畫
+  var fab=document.querySelector(".stt-fab"), fb=fab?parseFloat(getComputedStyle(fab).bottom):NaN;
+  el.style.setProperty("--ach-b", (fab && isFinite(fb) && fab.offsetHeight ? Math.round(fb+fab.offsetHeight+12) : 22)+"px");
+  el.style.setProperty("--ach-t", ms+"ms");
+  el.innerHTML='<span class="i">'+b.icon+'</span><span class="tx"><small>'+(b.hidden?"🥚 隱藏成就已解鎖":"成就已解鎖")+(b.t?"　·　"+T[b.t]:"")+
+    '</small><b>'+b.name+'</b><span class="q">'+b.quip+'</span></span><i class="bar"></i>';
+  document.body.appendChild(el);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ el.classList.add("on"); }); });
+  ding(b.hidden);
+  setTimeout(function(){ el.classList.remove("on"); setTimeout(function(){ el.remove(); next(); }, 450); }, ms);
+}
+
+/* ---------- 判斷 ---------- */
+function check(){
+  S=load(); S.got=S.got||{};
+  var p=prog(), g=S.got;
+  TOPICS.forEach(function(t){
+    var q=p[t]||{};
+    if(STEPS.every(function(s){ return q[s]; })) unlock(t+"_steps");
+  });
+  if(TOPICS.every(function(t){ var q=p[t]; return q && Object.keys(q).length; })) unlock("all_open");
+  if(TOPICS.every(function(t){ return g[t+"_quiz"]; })) unlock("all_quiz");
+  if(TOPICS.every(function(t){ return g[t+"_steps"]; })) unlock("all_steps");
+  var d=S.days||{}, td=today();
+  if(TOPICS.filter(function(t){ return (d[t]||[]).indexOf(td)>=0; }).length>=2) unlock("two_day");
+  var all={}; Object.keys(d).forEach(function(k){ (d[k]||[]).forEach(function(x){ all[x]=1; }); });
+  if(Object.keys(all).length>=2) unlock("egg_back");
+  var c=0; Object.keys(S.chaos||{}).forEach(function(k){ c+=S.chaos[k]; }); if(c>=30) unlock("egg_chaos");
+  if((S.tutor||0)>=5) unlock("egg_tutor");
+}
+function touchDay(){
+  S=load(); S.days=S.days||{};
+  var k=TOPICS.indexOf(TOPIC)>=0?TOPIC:"home", d=S.days[k]=S.days[k]||[], td=today();
+  if(d.indexOf(td)<0){ d.push(td); S.days[k]=d.slice(-30); save(S); }
+  var h=new Date().getHours(); if(h>=0 && h<5) unlock("egg_owl");
+}
+
+/* ---------- 走到 ⑩ 時：大大的「完成了！」框，選回選主題或下一個主題 ---------- */
+var FILE={reg:"regression.html", km:"kmeans.html", dt:"tree.html", vz:"road.html"};
+var ICON={reg:"📈", km:"🎯", dt:"🌳", vz:"📊"};
+var doneShown=false;
+function finishCard(){
+  if(doneShown || document.querySelector(".fin-wrap")) return;
+  var p=prog(), q=p[TOPIC]||{};
+  if(!STEPS.every(function(s){ return q[s]; })) return;
+  doneShown=true;
+  var left=TOPICS.filter(function(t){ var x=p[t]||{}; return t!==TOPIC && !STEPS.every(function(s){ return x[s]; }); });
+  var st=document.createElement("style");
+  // 舊 iPhone（iOS 14.4 以前不支援 inset、Safari 18 以前 backdrop-filter 要加 -webkit-）→ 都寫兩份
+  st.textContent=".fin-wrap{position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147482000;display:grid;place-items:center;padding:16px;background:rgba(20,24,30,.55);"+
+    "-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);-webkit-overflow-scrolling:touch;opacity:0;transition:opacity .3s;font:400 15px/1.6 'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif}"+
+    ".fin-wrap.on{opacity:1}.fin{position:relative;width:min(460px,100%);background:#fffdf8;color:#1f2328;border-radius:22px;padding:30px 26px 22px;text-align:center;"+
+    "box-shadow:0 30px 70px -20px rgba(0,0,0,.55);border-top:8px solid var(--fc);transform:scale(.9) translateY(20px);transition:transform .45s cubic-bezier(.2,.9,.3,1.3)}"+
+    ".fin-wrap.on .fin{transform:none}.fin .big{font-size:54px;line-height:1;margin-bottom:8px}.fin h2{margin:0 0 6px;font-size:24px;font-weight:800;color:var(--fc)}"+
+    ".fin-prog{margin:4px 0 14px}.fin-icons{display:flex;justify-content:center;gap:10px}"+
+    ".fin-icons span{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:#eee;filter:grayscale(1);opacity:.45}"+
+    ".fin-icons span.ok{filter:none;opacity:1;background:#fff;background:color-mix(in srgb,var(--tc) 16%,#fff);box-shadow:0 0 0 2px var(--tc)}"+   // 舊 iOS 不懂 color-mix → 退回白底
+    ".fin-cnt{margin-top:8px;font-size:14px;color:#5b6168}.fin-cnt b{color:var(--fc);font-size:17px}"+
+    ".fin p{margin:0 0 20px;color:#5b6168}.fin .btns{display:grid;gap:10px}"+
+    ".fin a{display:block;padding:14px 16px;border-radius:14px;font-weight:700;font-size:16px;text-decoration:none;transition:transform .15s,filter .15s}"+
+    ".fin a:hover{transform:translateY(-2px);filter:brightness(1.05)}.fin a.go{background:var(--nc);color:#fff;box-shadow:0 8px 18px -8px var(--nc)}"+
+    ".fin a.home{background:#efe9dc;color:#1f2328}.fin .x{position:absolute;top:10px;right:12px;border:0;background:none;font-size:22px;color:#9aa0a6;cursor:pointer;padding:4px 8px}"+
+    ".fin .stay{display:inline-block;margin-top:12px;border:0;background:none;color:#8a9097;font-size:13.5px;cursor:pointer;text-decoration:underline}"+
+    "@media (prefers-reduced-motion:reduce){.fin-wrap,.fin{transition:none}}";
+  document.head.appendChild(st);
+  var w=document.createElement("div"); w.className="fin-wrap"; w.setAttribute("role","dialog"); w.setAttribute("aria-modal","true");
+  var nx=left[0], nDone=TOPICS.length-left.length;
+  // 總進度：四個主題圖示，學完的亮、沒學完的灰（2026-11-11）
+  var dots='<div class="fin-prog"><div class="fin-icons">'+TOPICS.map(function(t){ var ok=left.indexOf(t)<0;
+      return '<span class="'+(ok?'ok':'')+'" title="'+T[t]+(ok?'：完成':'：還沒走完')+'" style="--tc:'+COLOR[t]+'">'+ICON[t]+'</span>'; }).join("")+
+    '</div><div class="fin-cnt">已完成 <b>'+nDone+'</b> / '+TOPICS.length+' 個主題</div></div>';
+  w.innerHTML='<div class="fin" style="--fc:'+COLOR[TOPIC]+';--nc:'+(nx?COLOR[nx]:COLOR[TOPIC])+'">'+
+    '<button class="x" aria-label="關閉">×</button><div class="big">🎉</div>'+
+    '<h2>「'+T[TOPIC]+'」完成了！</h2>'+
+    dots+
+    '<p>'+(nx?'十步全部走完，還有 '+left.length+' 個主題等你。接下來想做什麼？':'十步全部走完，四個主題你都學完了，太強了！')+'</p>'+
+    '<div class="btns">'+
+    (nx?'<a class="go" href="'+FILE[nx]+'">'+ICON[nx]+' 繼續學下一個：'+T[nx]+' →</a>':'')+
+    '<a class="home" href="index.html">← 回到選主題頁'+(nx?'':'，看看我的成就 🏅')+'</a></div>'+
+    '<button class="stay">先留在這頁，看看下一步建議</button></div>';
+  document.body.appendChild(w);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ w.classList.add("on"); }); });
+  function close(){ w.classList.remove("on"); setTimeout(function(){ w.remove(); },300); document.removeEventListener("keydown",esc); }
+  function esc(e){ if(e.key==="Escape") close(); }
+  w.querySelector(".x").onclick=close; w.querySelector(".stay").onclick=close;
+  w.addEventListener("click",function(e){ if(e.target===w) close(); });
+  document.addEventListener("keydown",esc);
+  try{ if(window.ULAB) ULAB.ev("topic_finish_card",{next:nx||""}); }catch(e){}
+}
+
+/* ---------- 主題頁：偵測搞亂資料、測驗完成、小助教 ---------- */
+if(TOPICS.indexOf(TOPIC)>=0){
+  var cur=window.STT_STATION||"";
+  window.addEventListener("stt-station",function(e){ cur=e.detail; setTimeout(check,50); if(cur==="next") setTimeout(finishCard,700); });
+  if(cur==="next") setTimeout(finishCard,1200);
+  // 搞亂資料：在 ⑥ 那一站按頁面裡的按鈕（導覽、小助教不算）；資料視覺化 ⑤⑥ 同一段 → 看是不是點在紅框 .chaosbar 裡
+  document.addEventListener("click",function(e){
+    var b=e.target.closest && e.target.closest("button,input[type=range],input[type=checkbox],select,[role=button]");
+    // 注意：分頁導覽.js 會在 <body> 加 class="pg-on"，pg- 開頭的規則不能算到 body，不然整頁都被略過（2026-11-11 修：迴歸、視覺化搞亂成就拿不到）
+    if(!b || b.closest("nav,header,footer,.stt,.stt-fab,#stationnav,:not(body):not(html)[class^='pg-'],:not(body):not(html)[class*=' pg-'],.ach-toast,.fin-wrap")) return;
+    var inChaos = TOPIC==="vz" ? !!b.closest(".chaosbar") : cur==="chaos";
+    if(!inChaos) return;
+    S=load(); S.chaos=S.chaos||{}; S.chaos[TOPIC]=(S.chaos[TOPIC]||0)+1; save(S);
+    if(S.chaos[TOPIC]>=3) unlock(TOPIC+"_chaos");
+    check();
+  },true);
+  // 測驗完成：各主題結果畫面出現的樣子不同，每 2 秒看一次（很省）
+  var DONE={
+    reg:function(){ var v=document.getElementById("vResult"); return v && !v.hidden && v.children.length; },
+    km:function(){ return document.querySelector("#cat-app h2.cat-h"); },
+    dt:function(){ return document.querySelector("#cat-root #to-diag"); },
+    vz:function(){ var a=document.getElementById("qDone"), b=document.getElementById("pDone");
+      return (a && a.style.display==="block") || (b && b.style.display==="block"); }
+  };
+  setInterval(function(){ if(!(load().got||{})[TOPIC+"_quiz"] && DONE[TOPIC]()) unlock(TOPIC+"_quiz"); }, 2000);
+}
+// 小助教：數「我問的」訊息（每一頁都有小助教，包含選主題頁）
+(function watchTutor(n){
+  var logEl=document.querySelector(".stt .stt-log");
+  if(!logEl){ if(n<20) setTimeout(function(){ watchTutor(n+1); }, 1000); return; }
+  new MutationObserver(function(ms){
+    var k=0; ms.forEach(function(m){ m.addedNodes.forEach(function(x){ if(x.classList && x.classList.contains("me")) k++; }); });
+    if(!k) return; S=load(); S.tutor=(S.tutor||0)+k; save(S); check();
+  }).observe(logEl,{childList:true});
+})(0);
+
+/* ---------- 選主題頁：徽章牆 ---------- */
+function wall(){
+  var host=document.querySelector(".flow"); if(!host) return;
+  var g=load().got||{}, shown=LIST.filter(function(b){ return !b.hidden; }), eggs=LIST.filter(function(b){ return b.hidden; });
+  var n=shown.filter(function(b){ return g[b.id]; }).length, ne=eggs.filter(function(b){ return g[b.id]; }).length;
+  var st=document.createElement("style");
+  st.textContent=".ach-wall{margin:34px 0 0;border:1.5px solid var(--line);border-radius:18px;background:var(--card);padding:6px 20px}"+
+    ".ach-wall summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:14px;padding:12px 0;font-weight:700}"+
+    ".ach-wall summary::-webkit-details-marker{display:none}.ach-wall summary .mini{display:flex;gap:3px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}"+
+    ".ach-wall summary .mini i{width:9px;height:9px;border-radius:50%;background:var(--line)}.ach-wall summary .mini i.on{background:var(--gold)}"+
+    ".ach-wall summary .cnt{color:var(--soft);font-weight:500;font-size:14px}.ach-wall summary .cnt b{color:var(--gold)}"+
+    ".ach-wall summary .arr{color:var(--faint);font-size:13px;font-weight:500}.ach-wall[open] summary .arr::after{content:'收起'}.ach-wall:not([open]) summary .arr::after{content:'展開'}"+
+    ".ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;padding:4px 0 18px}"+
+    ".ach-b{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--line);font-size:13.5px;line-height:1.4}"+
+    ".ach-b .i{font-size:24px;width:30px;text-align:center}.ach-b b{display:block;font-size:14px}.ach-b span{color:var(--soft)}"+
+    ".ach-b.off .i{filter:grayscale(1);opacity:.35}.ach-b.off b{color:var(--faint)}.ach-b.on{border-color:var(--c,var(--gold));background:rgba(255,200,0,.06);background:color-mix(in srgb,var(--c,var(--gold)) 7%,transparent)}"+
+    ".ach-b em{display:block;font-style:normal;font-size:12px;color:var(--faint);margin-top:4px}"+
+    ".ach-grp{grid-column:1/-1;font-size:12.5px;font-weight:700;letter-spacing:.08em;color:var(--faint);margin:8px 0 -2px}"+
+    ".ach-egg{display:inline;cursor:default;opacity:.55}.ach-egg:hover{opacity:.9}";
+  document.head.appendChild(st);
+  var d=document.createElement("details"); d.className="ach-wall";
+  var h='<summary>🏅 我的成就 <span class="cnt"><b>'+n+'</b> / '+shown.length+'</span><span class="mini" aria-hidden="true">'+
+    shown.map(function(b){ return '<i class="'+(g[b.id]?"on":"")+'"></i>'; }).join("")+'</span><span class="arr"></span></summary><div class="ach-grid">';
+  TOPICS.concat(["all"]).forEach(function(t){
+    h+='<div class="ach-grp">'+(t==="all"?"跨主題":T[t])+'</div>';
+    shown.filter(function(b){ return (b.t||"all")===t; }).forEach(function(b){
+      h+='<div class="ach-b '+(g[b.id]?"on":"off")+'"'+(b.t?' style="--c:var(--'+b.t+')"':'')+' title="'+(g[b.id]?b.quip:"")+'"><span class="i">'+b.icon+'</span><span><b>'+b.name+'</b><span>'+b.desc+'</span>'+
+        (g[b.id]?'<em>「'+b.quip+'」</em>':'')+'</span></div>';
+    });
+  });
+  h+='</div><p style="margin:-6px 0 14px;font-size:12.5px;color:var(--faint)">成就只記在這台電腦的瀏覽器裡，換電腦或清除瀏覽紀錄會重新開始。</p>';
+  d.innerHTML=h;
+  host.parentNode.insertBefore(d, host.nextSibling);
+  if(n && sessionStorageGet("ach_open")) d.open=true;
+  d.addEventListener("toggle",function(){ try{ sessionStorage.setItem("ach_open", d.open?"1":""); }catch(e){} });
+  // 彩蛋：頁尾一行很淡的字
+  var f=document.querySelector("footer");
+  if(f){ var s=document.createElement("span"); s.className="ach-egg";
+    var found=eggs.filter(function(b){ return g[b.id]; });
+    s.textContent="　·　"+(ne?"🥚 "+found.map(function(b){ return b.icon; }).join(" ")+"　彩蛋 "+ne+" / "+eggs.length:"這裡藏著 "+eggs.length+" 顆小彩蛋");
+    s.title=ne?found.map(function(b){ return b.name+"："+b.desc; }).join("\n"):"到處逛逛、多回來幾次，也許就會遇到";
+    f.appendChild(s); }
+}
+function sessionStorageGet(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } }
+
+touchDay();
+check();
+if(TOPIC==="home") wall();
+window.ULAB_ACH={list:LIST, state:load, unlock:unlock, check:check};
+})();
+</script>
+</body>
+</html>
