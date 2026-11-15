@@ -647,6 +647,14 @@ window.__QT=function(rows,types,color){
 #page-life .hero-life{clear:both}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&display=swap" rel="stylesheet"><style>#main h1{font-family:'Noto Serif TC','PMingLiU',serif;font-weight:900}</style><style>/* 花紋只在兩側（做上線版.py 加的） */body::before{opacity:.38;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(50% - 470px),transparent calc(50% - 430px),transparent calc(50% + 430px),#000 calc(50% + 470px),#000 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(50% - 470px),transparent calc(50% - 430px),transparent calc(50% + 430px),#000 calc(50% + 470px),#000 100%)}</style>
+<style>/* 可點的方塊：滑鼠移上去浮起來（做上線版.py 加的） */
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+:where(button,[role=button],summary,select,.station,[data-goto],label:has(>input[type=checkbox]),label:has(>input[type=radio]),a[class]:not(p a):not(li a):not(.topic)):not(:disabled):not([aria-disabled=true]):not(nav *):not(.topbar *):not(.topnav *):not(.pg-bar *):not(.pg-foot *):not(#stationnav *):not(#pagefoot *):not([class*=stt]):not([class*=stt] *):not([class*=ach-] *):not(.fin-wrap *):not(#u-cover *){
+  transition:translate .16s ease,filter .16s ease}
+:where(button,[role=button],summary,select,.station,[data-goto],label:has(>input[type=checkbox]),label:has(>input[type=radio]),a[class]:not(p a):not(li a):not(.topic)):not(:disabled):not([aria-disabled=true]):not(nav *):not(.topbar *):not(.topnav *):not(.pg-bar *):not(.pg-foot *):not(#stationnav *):not(#pagefoot *):not([class*=stt]):not([class*=stt] *):not([class*=ach-] *):not(.fin-wrap *):not(#u-cover *):hover{
+  translate:0 -2px;filter:drop-shadow(0 5px 7px rgba(20,30,50,.18))}
+}
+</style>
 <style>/* iOS 防自動放大（做上線版.py 加的） */@supports (-webkit-touch-callout:none){input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]),textarea,select{font-size:16px!important}}</style>
 </head>
 <body>

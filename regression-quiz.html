@@ -185,6 +185,14 @@ window.__QT=function(rows,types,color){
 };
 </script>
 <style>/* 背景花紋只在兩側（做上線版.py 加的） */body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cg fill='%2317798E'%3E%3Ccircle cx='40' cy='120' r='5'/%3E%3Ccircle cx='70' cy='92' r='4'/%3E%3Ccircle cx='98' cy='84' r='5'/%3E%3Ccircle cx='128' cy='52' r='4'/%3E%3C/g%3E%3Cline x1='28' y1='128' x2='142' y2='44' stroke='%2317798E' stroke-width='2.5'/%3E%3Cg fill='%2317798E'%3E%3Ccircle cx='220' cy='300' r='5'/%3E%3Ccircle cx='250' cy='272' r='4'/%3E%3Ccircle cx='282' cy='262' r='5'/%3E%3Ccircle cx='310' cy='232' r='4'/%3E%3C/g%3E%3Cline x1='208' y1='308' x2='324' y2='224' stroke='%2317798E' stroke-width='2.5'/%3E%3C/svg%3E");background-size:360px 360px;opacity:0.16;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(50% - 440px),transparent calc(50% - 400px),transparent calc(50% + 400px),#000 calc(50% + 440px),#000 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(50% - 440px),transparent calc(50% - 400px),transparent calc(50% + 400px),#000 calc(50% + 440px),#000 100%)}</style>
+<style>/* 可點的方塊：滑鼠移上去浮起來（做上線版.py 加的） */
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+:where(button,[role=button],summary,select,.station,[data-goto],label:has(>input[type=checkbox]),label:has(>input[type=radio]),a[class]:not(p a):not(li a):not(.topic)):not(:disabled):not([aria-disabled=true]):not(nav *):not(.topbar *):not(.topnav *):not(.pg-bar *):not(.pg-foot *):not(#stationnav *):not(#pagefoot *):not([class*=stt]):not([class*=stt] *):not([class*=ach-] *):not(.fin-wrap *):not(#u-cover *){
+  transition:translate .16s ease,filter .16s ease}
+:where(button,[role=button],summary,select,.station,[data-goto],label:has(>input[type=checkbox]),label:has(>input[type=radio]),a[class]:not(p a):not(li a):not(.topic)):not(:disabled):not([aria-disabled=true]):not(nav *):not(.topbar *):not(.topnav *):not(.pg-bar *):not(.pg-foot *):not(#stationnav *):not(#pagefoot *):not([class*=stt]):not([class*=stt] *):not([class*=ach-] *):not(.fin-wrap *):not(#u-cover *):hover{
+  translate:0 -2px;filter:drop-shadow(0 5px 7px rgba(20,30,50,.18))}
+}
+</style>
 <style>/* iOS 防自動放大（做上線版.py 加的） */@supports (-webkit-touch-callout:none){input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]),textarea,select{font-size:16px!important}}</style>
 </head>
 <body>

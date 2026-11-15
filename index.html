@@ -69,25 +69,54 @@ footer{margin:36px 0 0;padding:18px 0 40px;border-top:1px solid var(--line);font
 @media (max-width:560px){header{padding:40px 0 24px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<style>/* 可點的方塊：滑鼠移上去浮起來（做上線版.py 加的） */
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+:where(button,[role=button],summary,select,.station,[data-goto],label:has(>input[type=checkbox]),label:has(>input[type=radio]),a[class]:not(p a):not(li a):not(.topic)):not(:disabled):not([aria-disabled=true]):not(nav *):not(.topbar *):not(.topnav *):not(.pg-bar *):not(.pg-foot *):not(#stationnav *):not(#pagefoot *):not([class*=stt]):not([class*=stt] *):not([class*=ach-] *):not(.fin-wrap *):not(#u-cover *){
+  transition:translate .16s ease,filter .16s ease}
+:where(button,[role=button],summary,select,.station,[data-goto],label:has(>input[type=checkbox]),label:has(>input[type=radio]),a[class]:not(p a):not(li a):not(.topic)):not(:disabled):not([aria-disabled=true]):not(nav *):not(.topbar *):not(.topnav *):not(.pg-bar *):not(.pg-foot *):not(#stationnav *):not(#pagefoot *):not([class*=stt]):not([class*=stt] *):not([class*=ach-] *):not(.fin-wrap *):not(#u-cover *):hover{
+  translate:0 -2px;filter:drop-shadow(0 5px 7px rgba(20,30,50,.18))}
+}
+</style>
 <style>/* iOS 防自動放大（做上線版.py 加的） */@supports (-webkit-touch-callout:none){input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]),textarea,select{font-size:16px!important}}</style>
 </head>
 <body>
-<!--u-cover-start--><div id="u-cover" role="dialog" aria-label="全民數據科學實驗室 封面" hidden>
-  <div class="uc-box"><img src="cover.jpg" decoding="async" fetchpriority="high" alt="全民數據科學實驗室：讓統計看得見" draggable="false">
-    <button type="button" class="uc-go" aria-label="進入遊戲"></button></div>
+<!--u-cover-start--><div id="u-cover" role="button" tabindex="0" aria-label="全民數據科學實驗室：點一下進入" hidden>
+  <div class="uc-deco" aria-hidden="true">
+    <svg class="tl" viewBox="0 0 86 86"><g fill="#17798E"><circle cx="16" cy="66" r="4"/><circle cx="28" cy="54" r="3.5"/><circle cx="40" cy="58" r="4"/><circle cx="50" cy="40" r="3.5"/><circle cx="64" cy="34" r="4"/><circle cx="72" cy="20" r="3.5"/></g><line x1="10" y1="72" x2="78" y2="16" stroke="#1B2F5E" stroke-width="2" stroke-linecap="round" opacity=".7"/></svg>
+    <svg class="tr" viewBox="0 0 86 86"><g fill="#2A78D6"><circle cx="22" cy="24" r="4"/><circle cx="30" cy="18" r="3.5"/><circle cx="28" cy="31" r="3.5"/></g><g fill="#C7391F"><circle cx="62" cy="28" r="4"/><circle cx="70" cy="22" r="3.5"/><circle cx="68" cy="35" r="3.5"/></g><g fill="#B88412"><circle cx="42" cy="62" r="4"/><circle cx="50" cy="68" r="3.5"/><circle cx="36" cy="70" r="3.5"/></g></svg>
+    <svg class="bl" viewBox="0 0 86 86" fill="none" stroke-linecap="round"><path d="M43 22 L24 46 M43 22 L62 46 M24 46 L14 66 M24 46 L34 66" stroke="#1B2F5E" stroke-width="2" opacity=".7"/><rect x="33" y="14" width="20" height="12" rx="4" fill="#C7391F"/><g fill="#FCF6EC" stroke="#C7391F" stroke-width="2"><circle cx="14" cy="68" r="5"/><circle cx="34" cy="68" r="5"/><circle cx="62" cy="48" r="5"/></g></svg>
+    <svg class="br" viewBox="0 0 86 86"><g fill="#B26A00"><rect x="16" y="46" width="11" height="24" rx="2" opacity=".55"/><rect x="31" y="34" width="11" height="36" rx="2" opacity=".75"/><rect x="46" y="22" width="11" height="48" rx="2"/><rect x="61" y="40" width="11" height="30" rx="2" opacity=".6"/></g><line x1="10" y1="70" x2="78" y2="70" stroke="#1B2F5E" stroke-width="2" stroke-linecap="round" opacity=".7"/></svg>
+    <i class="t" style="left:33%;background:#17798E"></i><i class="t" style="left:50%;background:#B88412"></i><i class="t" style="left:67%;background:#2A78D6"></i>
+    <i class="b" style="left:33%;background:#C7391F"></i><i class="b" style="left:50%;background:#B88412"></i><i class="b" style="left:67%;background:#B26A00"></i>
+    <i class="l" style="top:50%;background:#2A78D6"></i><i class="r" style="top:50%;background:#C7391F"></i>
+  </div>
+  <div class="uc-box"><img src="cover.jpg" decoding="async" fetchpriority="high" alt="全民數據科學實驗室：讓統計看得見" draggable="false"></div>
   <div class="uc-hint">點一下任何地方進入</div>
 </div>
 <style>/* 首頁封面（做上線版.py 加的） */
-#u-cover{position:fixed;inset:0;z-index:2147483000;background:#FBF5EB;display:grid;place-items:center;cursor:pointer;transition:opacity .55s ease,visibility .55s,transform .55s ease}
+#u-cover{position:fixed;inset:0;z-index:2147483000;background:#FCF6EC;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;transition:opacity .55s ease,visibility .55s,transform .55s ease}
 #u-cover[hidden]{display:none}
 #u-cover.out{opacity:0;visibility:hidden;transform:scale(1.03)}
-#u-cover .uc-box{position:relative;width:min(100vw,160.5vh);aspect-ratio:1589/990}
-#u-cover img{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
-#u-cover .uc-go{position:absolute;left:75.8%;top:82.6%;width:21.6%;height:11.6%;border:0;border-radius:999px;background:transparent;cursor:pointer;transition:box-shadow .25s,transform .25s}
-#u-cover .uc-go:hover,#u-cover .uc-go:focus-visible{box-shadow:0 0 0 4px rgba(42,120,214,.35),0 10px 30px rgba(20,40,80,.25);transform:translateY(-2px);outline:none}
-#u-cover .uc-hint{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));text-align:center;font:600 14px/1.4 'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;color:#1B2F5E;opacity:.55;letter-spacing:.12em;animation:ucPulse 2.4s ease-in-out infinite}
+/* 2026-11-15 使用者：全螢幕時兩側有蓋不到的地方 → 盡量滿版：
+   比圖寬的螢幕（16:9 等）放大到填滿，上下最多裁掉 12%（標題、按鈕都還在）；更寬的（21:9）才留一點邊；
+   比圖窄的（手機、5:4）左右最多裁 3%（按鈕要留著）；圖的四邊淡出接到同色底，留邊時也看不出接縫 */
+/* （續）使用者：封面的圖文小一點、邊框加小點綴 → 圖縮到畫面中間（不再裁切），四邊淡出接到同色底；
+   外圍一圈細虛線框＋四個角放四個主題的小圖（迴歸／分群／決策樹／長條圖）＋框上幾顆彩色小點 */
+#u-cover .uc-box{position:relative;width:min(80vw,124vh);aspect-ratio:1589/990;flex:none}
+@media (max-width:700px){#u-cover .uc-box{width:100vw}}
+#u-cover img{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(180deg,transparent,#000 7%,#000 93%,transparent);
+  -webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(180deg,transparent,#000 7%,#000 93%,transparent);mask-composite:intersect}
+#u-cover .uc-deco{position:absolute;inset:16px;pointer-events:none;border:1.5px dashed rgba(27,47,94,.22);border-radius:24px}
+#u-cover .uc-deco::after{content:"";position:absolute;inset:7px;border:1px solid rgba(27,47,94,.10);border-radius:18px}
+#u-cover .uc-deco svg{position:absolute;width:clamp(52px,7vw,92px);height:clamp(52px,7vw,92px);opacity:.8}
+#u-cover .uc-deco .tl{top:14px;left:14px}#u-cover .uc-deco .tr{top:14px;right:14px}#u-cover .uc-deco .bl{bottom:14px;left:14px}#u-cover .uc-deco .br{bottom:14px;right:14px}
+#u-cover .uc-deco i{position:absolute;width:8px;height:8px;border-radius:50%;opacity:.75}
+#u-cover .uc-deco i.t{top:-5px}#u-cover .uc-deco i.b{bottom:-5px}#u-cover .uc-deco i.l{left:-5px}#u-cover .uc-deco i.r{right:-5px}
+@media (max-width:700px){#u-cover .uc-deco{inset:10px}#u-cover .uc-deco svg{width:48px;height:48px}}
+#u-cover:focus-visible{outline:none}
+#u-cover .uc-hint{position:absolute;left:0;right:0;bottom:max(22px,env(safe-area-inset-bottom));text-align:center;font:600 15px/1.4 'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;color:#1B2F5E;opacity:.55;letter-spacing:.12em;animation:ucPulse 2.4s ease-in-out infinite}
 @keyframes ucPulse{50%{opacity:.25}}
-@media (min-aspect-ratio:3/2) and (min-width:700px){#u-cover .uc-hint{display:none}}
 @media (prefers-reduced-motion:reduce){#u-cover{transition:none}#u-cover .uc-hint{animation:none}}
 body.uc-open{overflow:hidden}
 </style>
@@ -97,7 +126,7 @@ body.uc-open{overflow:hidden}
   var force=/[?&]cover=1/.test(location.search);
   if(!force && (seen() || location.hash)) { c.remove(); return; }
   c.hidden=false; document.body.classList.add("uc-open");
-  var go=c.querySelector(".uc-go"); try{ go.focus({preventScroll:true}); }catch(e){}
+  try{ c.focus({preventScroll:true}); }catch(e){}   /* 2026-11-15 使用者：拿掉「進入遊戲」按鈕（圖上的也擦掉了），點任何地方進入 */
   var busy=false;
   function done(rise){   // 封面拿掉、選主題頁內容出現
     c.classList.add("out"); document.body.classList.remove("uc-open");
@@ -115,7 +144,7 @@ body.uc-open{overflow:hidden}
   function tunnel(){
     var img=c.querySelector("img"), r=img.getBoundingClientRect();
     var cx=r.left+r.width*.632, cy=r.top+r.height*.265, D=Math.hypot(innerWidth,innerHeight);
-    c.querySelectorAll(".uc-go,.uc-hint").forEach(function(e){ e.style.transition="opacity .2s"; e.style.opacity=0; });
+    c.querySelectorAll(".uc-hint").forEach(function(e){ e.style.transition="opacity .2s"; e.style.opacity=0; });
     img.style.transformOrigin="63.2% 26.5%";
     img.animate([{transform:"scale(1)",opacity:1},{transform:"scale(1.8)",opacity:0}],{duration:900,easing:"cubic-bezier(.4,0,.6,1)",fill:"forwards"});
     // 環用寬高變大（不用 scale：線才不會被放粗、也不用一張超大圖層）；只有 5 個小元素，很輕
