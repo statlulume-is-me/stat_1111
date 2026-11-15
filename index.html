@@ -72,6 +72,67 @@ footer{margin:36px 0 0;padding:18px 0 40px;border-top:1px solid var(--line);font
 <style>/* iOS 防自動放大（做上線版.py 加的） */@supports (-webkit-touch-callout:none){input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]),textarea,select{font-size:16px!important}}</style>
 </head>
 <body>
+<!--u-cover-start--><div id="u-cover" role="dialog" aria-label="全民數據科學實驗室 封面" hidden>
+  <div class="uc-box"><img src="cover.jpg" decoding="async" fetchpriority="high" alt="全民數據科學實驗室：讓統計看得見" draggable="false">
+    <button type="button" class="uc-go" aria-label="進入遊戲"></button></div>
+  <div class="uc-hint">點一下任何地方進入</div>
+</div>
+<style>/* 首頁封面（做上線版.py 加的） */
+#u-cover{position:fixed;inset:0;z-index:2147483000;background:#FBF5EB;display:grid;place-items:center;cursor:pointer;transition:opacity .55s ease,visibility .55s,transform .55s ease}
+#u-cover[hidden]{display:none}
+#u-cover.out{opacity:0;visibility:hidden;transform:scale(1.03)}
+#u-cover .uc-box{position:relative;width:min(100vw,160.5vh);aspect-ratio:1589/990}
+#u-cover img{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
+#u-cover .uc-go{position:absolute;left:75.8%;top:82.6%;width:21.6%;height:11.6%;border:0;border-radius:999px;background:transparent;cursor:pointer;transition:box-shadow .25s,transform .25s}
+#u-cover .uc-go:hover,#u-cover .uc-go:focus-visible{box-shadow:0 0 0 4px rgba(42,120,214,.35),0 10px 30px rgba(20,40,80,.25);transform:translateY(-2px);outline:none}
+#u-cover .uc-hint{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));text-align:center;font:600 14px/1.4 'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;color:#1B2F5E;opacity:.55;letter-spacing:.12em;animation:ucPulse 2.4s ease-in-out infinite}
+@keyframes ucPulse{50%{opacity:.25}}
+@media (min-aspect-ratio:3/2) and (min-width:700px){#u-cover .uc-hint{display:none}}
+@media (prefers-reduced-motion:reduce){#u-cover{transition:none}#u-cover .uc-hint{animation:none}}
+body.uc-open{overflow:hidden}
+</style>
+<script>(function(){
+  var c=document.getElementById("u-cover"), K="ulab_cover_seen";
+  function seen(){ try{ return sessionStorage.getItem(K)==="1"; }catch(e){ return false; } }
+  var force=/[?&]cover=1/.test(location.search);
+  if(!force && (seen() || location.hash)) { c.remove(); return; }
+  c.hidden=false; document.body.classList.add("uc-open");
+  var go=c.querySelector(".uc-go"); try{ go.focus({preventScroll:true}); }catch(e){}
+  var busy=false;
+  function done(rise){   // 封面拿掉、選主題頁內容出現
+    c.classList.add("out"); document.body.classList.remove("uc-open");
+    try{ if(window.UANIM) UANIM.play(UANIM.targets(), rise, 640); }catch(e){}
+    setTimeout(function(){ c.remove(); }, 600); }
+  function enter(){ if(busy) return; busy=true;
+    try{ sessionStorage.setItem(K,"1"); }catch(e){}
+    try{ if(window.ULAB&&ULAB.ev) ULAB.ev("cover_enter"); }catch(e){}
+    var reduce=false; try{ reduce=matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
+    if(reduce || !Element.prototype.animate){ done({opacity:0,transform:"translateY(18px)"}); return; }
+    tunnel(); }
+  // ---- 2026-11-15 時光隧道（簡化版）：使用者說原本的 canvas 版會卡一下、有點暈 →
+  //      不旋轉、不加速、不模糊、不用深色背景；只有封面往曲線頂點小圓圈輕輕放大淡出＋5 圈細環從圓點往外擴散。
+  //      全部是 transform／opacity（顯示卡處理），總長約 1.1 秒
+  function tunnel(){
+    var img=c.querySelector("img"), r=img.getBoundingClientRect();
+    var cx=r.left+r.width*.632, cy=r.top+r.height*.265, D=Math.hypot(innerWidth,innerHeight);
+    c.querySelectorAll(".uc-go,.uc-hint").forEach(function(e){ e.style.transition="opacity .2s"; e.style.opacity=0; });
+    img.style.transformOrigin="63.2% 26.5%";
+    img.animate([{transform:"scale(1)",opacity:1},{transform:"scale(1.8)",opacity:0}],{duration:900,easing:"cubic-bezier(.4,0,.6,1)",fill:"forwards"});
+    // 環用寬高變大（不用 scale：線才不會被放粗、也不用一張超大圖層）；只有 5 個小元素，很輕
+    var COL=["#2A78D6","#EDA100","#6EA8F0","#2A78D6","#EDA100"], S=Math.round(D*2);
+    COL.forEach(function(col,i){
+      var d=document.createElement("div");
+      d.style.cssText="position:absolute;left:"+cx+"px;top:"+cy+"px;width:20px;height:20px;transform:translate(-50%,-50%);border-radius:50%;border:3px solid "+col+";pointer-events:none;opacity:0;box-sizing:border-box";
+      c.appendChild(d);
+      d.animate([{width:"20px",height:"20px",opacity:0},{width:"70px",height:"70px",opacity:.8,offset:.15},{width:S+"px",height:S+"px",opacity:0}],
+        {duration:950,delay:i*90,easing:"cubic-bezier(.3,0,.7,1)",fill:"forwards"});
+    });
+    setTimeout(function(){ done({opacity:0,transform:"scale(1.03)"}); }, 950);   // 封面淡出、選主題頁輕輕縮回原大小
+  }
+  c.addEventListener("click",enter);
+  document.addEventListener("keydown",function k(e){ if(!c.isConnected){ document.removeEventListener("keydown",k); return; }
+    if(e.key==="Enter"||e.key===" "||e.key==="Escape"){ e.preventDefault(); enter(); } });
+})();</script><!--u-cover-end-->
 <div class="wrap">
 <header>
   <div class="brand">全民數據科學實驗室</div>
@@ -455,6 +516,69 @@ touchDay();
 check();
 if(TOPIC==="home") wall();
 window.ULAB_ACH={list:LIST, state:load, unlock:unlock, check:check};
+})();
+</script>
+<script>window.UANIM_SEL="header, main.topics, p.flow";</script>
+<script>/* 換頁動畫（2026-11-15，做上線版.py 注入四個主題頁＋選主題頁）
+   ① 同一個主題裡換步驟：往後一步 → 內容從右邊滑進來；往前一步 → 從左邊滑進來（聽各頁本來就會發的 stt-station 事件）
+   ② 剛打開頁面：內容輕輕往上浮出來
+   ③ 頁面之間（選主題 ⇄ 主題）：瀏覽器內建的跨頁轉場（Chrome／Edge／Safari 18.2+；Firefox 不支援就是一般換頁）
+   只動 transform／opacity（顯示卡處理，幾乎不吃效能），動畫結束就把 transform 拿掉，不影響固定在畫面上的按鈕；
+   使用者系統有開「減少動態效果」就全部不做。
+   window.UANIM_SEL＝這一頁「內容區」的 CSS 選擇器（做上線版.py 依主題設定） */
+(function(){
+  var reduce=false; try{ reduce=matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
+  var ORDER=["life","guess","story","principle","lab","chaos","myth","quiz","diag","next"];
+  var SEL=window.UANIM_SEL||"main";
+  var EASE="cubic-bezier(.22,.7,.2,1)";
+
+  // ---- ③ 跨頁轉場：新頁是選主題頁＝「回去」（往右滑），其他＝「往前」（往左滑）
+  var css="@view-transition{navigation:auto}"+
+    "::view-transition-old(root){animation:uvt-out .32s "+EASE+" both}"+
+    "::view-transition-new(root){animation:uvt-in .32s "+EASE+" both}"+
+    "html[data-uvt=back]::view-transition-old(root){animation-name:uvt-out-b}"+
+    "html[data-uvt=back]::view-transition-new(root){animation-name:uvt-in-b}"+
+    "@keyframes uvt-out{to{opacity:0;transform:translateX(-56px)}}@keyframes uvt-in{from{opacity:0;transform:translateX(56px)}}"+
+    "@keyframes uvt-out-b{to{opacity:0;transform:translateX(56px)}}@keyframes uvt-in-b{from{opacity:0;transform:translateX(-56px)}}"+
+    "@media (prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}}";
+  var st=document.createElement("style"); st.textContent=css; document.head.appendChild(st);
+  if(window.ULAB_TOPIC==="home") document.documentElement.setAttribute("data-uvt","back");
+  window.addEventListener("pagereveal",function(e){ window.__uvtCross=!!e.viewTransition; });
+
+  if(reduce || !Element.prototype.animate) return;
+
+  function targets(){
+    var out=[]; document.querySelectorAll(SEL).forEach(function(el){
+      if(el.offsetParent!==null || getComputedStyle(el).position==="fixed") out.push(el); });
+    return out;
+  }
+  function play(els, from, ms){
+    els.forEach(function(el){
+      try{ if(el.__uanim) el.__uanim.cancel(); }catch(e){}
+      try{ el.__uanim=el.animate([from,{opacity:1,transform:"none"}],{duration:ms,easing:EASE}); }catch(e){}
+    });
+  }
+  function idx(k){ if(k==null) return -1; var i=ORDER.indexOf(k); return i<0?99:i; }   // 地圖／首頁＝-1，附錄類＝最後面
+
+  // ---- ② 剛打開：輕輕浮上來（有跨頁轉場時就交給它，不重複）
+  var cur=window.STT_STATION, t0=Date.now();
+  function enter(){
+    if(window.__uvtCross) return;
+    play(targets(),{opacity:0,transform:"translateY(14px)"},420);
+  }
+
+  // ---- ① 換步驟：依前後方向左右滑
+  window.addEventListener("stt-station",function(e){
+    var k=e.detail;
+    if(Date.now()-t0<600){ cur=k; return; }   // 頁面初始化（深連結 #s3 等）發的那一次不滑，交給「剛打開」的浮出
+    if(k===cur) return;
+    var d=idx(k)>idx(cur)?1:-1; cur=k;
+    // 等這一頁真的換好內容（K-means 有 0.18 秒淡出、其他是同步切換）
+    requestAnimationFrame(function(){ play(targets(),{opacity:0,transform:"translateX("+(d*44)+"px)"},340); });
+  });
+  if(window.ULAB_TOPIC==="home" && document.getElementById("u-cover")){}   // 有封面時：封面淡出時才浮出（見封面程式）
+  else if(document.readyState==="complete") enter(); else window.addEventListener("load",enter);
+  window.UANIM={play:play,targets:targets};
 })();
 </script>
 </body>

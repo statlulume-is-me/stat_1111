@@ -484,7 +484,7 @@
   /* ---- ① 生活 ---- */
   .hero-life{background:linear-gradient(135deg,#fff 0%,#f3f8ff 100%);border:1px solid #d6e6fb;overflow:hidden;position:relative}
   .patrol{position:relative;height:42px;margin:-4px -20px 8px;overflow:hidden;border-bottom:2px dashed #cfe0f5}
-  .patrol span{position:absolute;bottom:2px;font-size:30px;animation:drive 9s linear infinite}
+  .patrol span{position:absolute;bottom:2px;font-size:30px;animation:drive 9s linear infinite;transform:scaleX(-1)}/* 2026-11-15 車頭朝左的 emoji 往右開會像倒車 → 左右翻過來 */
   .patrol span:nth-child(2){animation-delay:-3s;font-size:26px}
   .patrol span:nth-child(3){animation-delay:-6s}
   @keyframes drive{from{left:-12%}to{left:104%}}
@@ -4897,6 +4897,69 @@ touchDay();
 check();
 if(TOPIC==="home") wall();
 window.ULAB_ACH={list:LIST, state:load, unlock:unlock, check:check};
+})();
+</script>
+<script>window.UANIM_SEL="#main";</script>
+<script>/* 換頁動畫（2026-11-15，做上線版.py 注入四個主題頁＋選主題頁）
+   ① 同一個主題裡換步驟：往後一步 → 內容從右邊滑進來；往前一步 → 從左邊滑進來（聽各頁本來就會發的 stt-station 事件）
+   ② 剛打開頁面：內容輕輕往上浮出來
+   ③ 頁面之間（選主題 ⇄ 主題）：瀏覽器內建的跨頁轉場（Chrome／Edge／Safari 18.2+；Firefox 不支援就是一般換頁）
+   只動 transform／opacity（顯示卡處理，幾乎不吃效能），動畫結束就把 transform 拿掉，不影響固定在畫面上的按鈕；
+   使用者系統有開「減少動態效果」就全部不做。
+   window.UANIM_SEL＝這一頁「內容區」的 CSS 選擇器（做上線版.py 依主題設定） */
+(function(){
+  var reduce=false; try{ reduce=matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
+  var ORDER=["life","guess","story","principle","lab","chaos","myth","quiz","diag","next"];
+  var SEL=window.UANIM_SEL||"main";
+  var EASE="cubic-bezier(.22,.7,.2,1)";
+
+  // ---- ③ 跨頁轉場：新頁是選主題頁＝「回去」（往右滑），其他＝「往前」（往左滑）
+  var css="@view-transition{navigation:auto}"+
+    "::view-transition-old(root){animation:uvt-out .32s "+EASE+" both}"+
+    "::view-transition-new(root){animation:uvt-in .32s "+EASE+" both}"+
+    "html[data-uvt=back]::view-transition-old(root){animation-name:uvt-out-b}"+
+    "html[data-uvt=back]::view-transition-new(root){animation-name:uvt-in-b}"+
+    "@keyframes uvt-out{to{opacity:0;transform:translateX(-56px)}}@keyframes uvt-in{from{opacity:0;transform:translateX(56px)}}"+
+    "@keyframes uvt-out-b{to{opacity:0;transform:translateX(56px)}}@keyframes uvt-in-b{from{opacity:0;transform:translateX(-56px)}}"+
+    "@media (prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}}";
+  var st=document.createElement("style"); st.textContent=css; document.head.appendChild(st);
+  if(window.ULAB_TOPIC==="home") document.documentElement.setAttribute("data-uvt","back");
+  window.addEventListener("pagereveal",function(e){ window.__uvtCross=!!e.viewTransition; });
+
+  if(reduce || !Element.prototype.animate) return;
+
+  function targets(){
+    var out=[]; document.querySelectorAll(SEL).forEach(function(el){
+      if(el.offsetParent!==null || getComputedStyle(el).position==="fixed") out.push(el); });
+    return out;
+  }
+  function play(els, from, ms){
+    els.forEach(function(el){
+      try{ if(el.__uanim) el.__uanim.cancel(); }catch(e){}
+      try{ el.__uanim=el.animate([from,{opacity:1,transform:"none"}],{duration:ms,easing:EASE}); }catch(e){}
+    });
+  }
+  function idx(k){ if(k==null) return -1; var i=ORDER.indexOf(k); return i<0?99:i; }   // 地圖／首頁＝-1，附錄類＝最後面
+
+  // ---- ② 剛打開：輕輕浮上來（有跨頁轉場時就交給它，不重複）
+  var cur=window.STT_STATION, t0=Date.now();
+  function enter(){
+    if(window.__uvtCross) return;
+    play(targets(),{opacity:0,transform:"translateY(14px)"},420);
+  }
+
+  // ---- ① 換步驟：依前後方向左右滑
+  window.addEventListener("stt-station",function(e){
+    var k=e.detail;
+    if(Date.now()-t0<600){ cur=k; return; }   // 頁面初始化（深連結 #s3 等）發的那一次不滑，交給「剛打開」的浮出
+    if(k===cur) return;
+    var d=idx(k)>idx(cur)?1:-1; cur=k;
+    // 等這一頁真的換好內容（K-means 有 0.18 秒淡出、其他是同步切換）
+    requestAnimationFrame(function(){ play(targets(),{opacity:0,transform:"translateX("+(d*44)+"px)"},340); });
+  });
+  if(window.ULAB_TOPIC==="home" && document.getElementById("u-cover")){}   // 有封面時：封面淡出時才浮出（見封面程式）
+  else if(document.readyState==="complete") enter(); else window.addEventListener("load",enter);
+  window.UANIM={play:play,targets:targets};
 })();
 </script>
 </body>
