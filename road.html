@@ -611,21 +611,23 @@ window.__QT=function(rows,types,color){
     </div>
 
     <div class="card vidcard" id="storyVideo">
-      <div class="vtag">完整版動畫影片　約 7 分 15 秒</div>
+      <div class="vtag">完整版動畫影片　約 5 分 35 秒</div>
       <div class="vt">從生活問題，到圖表教學，再到圖表的禁忌</div>
       <p class="sub" style="margin:.2em 0 .8em">上面四幕是「資料的來歷」；這支影片把整個專案從頭講一遍：先從「城市車多，真的比較危險嗎？」出發，教你依問題選圖，最後示範五個會讓圖騙人的禁忌。有旁白與字幕，可點下方章節跳段，也可全螢幕觀看。</p>
       <div class="vidwrap">
-        <video id="mvVideo" controls preload="metadata" playsinline poster="videos/vz_poster.jpg" aria-label="馬路地獄地圖資料視覺化動畫影片">
+        <video id="mvVideo" controls preload="metadata" playsinline poster="videos/vz_main_poster.jpg" aria-label="馬路地獄地圖資料視覺化動畫影片">
           <source src="videos/vz_main.mp4" onerror="var c=document.getElementById('storyVideo');if(c)c.hidden=true" type="video/mp4">
           你的瀏覽器不支援影片播放。
         </video>
       </div>
       <div class="chaps" role="group" aria-label="影片章節">
-        <button type="button" data-t="0.0">Part 1　生活問題 0:00</button>
-        <button type="button" data-t="37.7">Part 2　圖表教學 0:37</button>
-        <button type="button" data-t="164.9">Part 2　散布圖 2:44</button>
-        <button type="button" data-t="263.6">Part 3　限制與禁忌 4:23</button>
-        <button type="button" data-t="376.5">Part 3　分母陷阱 6:16</button>
+        <button type="button" data-t="0">Part 1　生活問題 0:00</button>
+        <button type="button" data-t="29">Part 2　為什麼要畫圖 0:29</button>
+        <button type="button" data-t="53">Part 2　怎麼選圖 0:53</button>
+        <button type="button" data-t="127">Part 2　散布圖 2:07</button>
+        <button type="button" data-t="209">Part 3　圖表的禁忌 3:29</button>
+        <button type="button" data-t="290">Part 3　分母陷阱 4:50</button>
+        <button type="button" data-t="309">帶走三件事 5:09</button>
       </div>
       <p class="small">影片數據與本頁相同（114 年、死亡以 30 日內計、已排除國道警局重複計算）；旁白為合成語音，字幕已直接放在畫面下方。</p>
     </div>
@@ -3214,6 +3216,37 @@ if(!(start && route(start,true))) go(C.steps[0].id,{keepHash:true});
 })();
 </script>
 <script src="tutor.js" data-topic="road"></script>
+<script>/* ⑨ 學習診斷：答錯的題目類型推薦補救影片（做上線版.py 加的，2026-11-16） */
+(function(){
+var V=[{"f": "vz_t1_chart_type", "t": "圖表類型選擇"}, {"f": "vz_t2_purpose_data", "t": "視覺化目的與資料型態"}, {"f": "vz_t3_misleading", "t": "誤導圖表與指標設計"}, {"f": "vz_t4_design_color", "t": "圖表設計與配色"}, {"f": "vz_t5_stats_advanced", "t": "統計解讀與進階圖表"}];
+function data(){ try{ return (typeof DIAG!=="undefined"&&DIAG.qt)||null; }catch(e){ return null; } }
+function vid(v,open,why){ return '<details class="vr-item"'+(open?' open':'')+'><summary>🎬 '+v.t+(why?' <span class="vr-why">'+why+'</span>':'')+'</summary>'+
+  '<video controls playsinline preload="'+(open?'metadata':'none')+'" poster="videos/'+v.f+'_poster.jpg" src="videos/'+v.f+'.mp4" onerror="var c=this.closest(\'.vrec\');if(c)c.remove()"></video></details>'; }
+var last="";
+function card(){
+  var body=document.getElementById("diagBody"); if(!body) return;
+  var qt=data(), pick=[];
+  if(qt) pick=V.map(function(_,i){return i;}).filter(function(i){ var o=qt[V[i].t]; return o&&o.ok<o.n; })
+    .sort(function(a,b){ var A=qt[V[a].t],B=qt[V[b].t]; return (B.n-B.ok)-(A.n-A.ok) || (B.n-B.ok)/B.n-(A.n-A.ok)/A.n; });
+  // 只答錯才出現；記下「錯幾題」的組合，有變才重畫（不然看影片看到一半會被洗掉）
+  var sig=pick.map(function(i){ var o=qt[V[i].t]; return i+":"+(o.n-o.ok)+"/"+o.n; }).join(",");
+  if(sig===last && (sig==="" || document.getElementById("vzRec"))) return; last=sig;
+  var old=document.getElementById("vzRec"); if(old) old.remove();
+  if(!pick.length) return;
+  var h='<div class="card vrec" id="vzRec"><h3>🎬 答錯的題目類型，用影片補起來</h3><p class="muted">你在測驗裡這幾類題目有答錯，各有一支約 2–4 分鐘的補救影片：</p>';
+  pick.forEach(function(i,k){ var o=qt[V[i].t]; h+=vid(V[i],k===0,'錯 '+(o.n-o.ok)+' / '+o.n+' 題'); });
+  body.insertAdjacentHTML("afterend", h+'</div>');
+  try{ if(window.ULAB) ULAB.ev("vidrec_show",{pick:pick.map(function(i){return i+1;}).join("|")}); }catch(e){}
+}
+var st=document.createElement("style");
+st.textContent=".vrec{margin-top:18px;border-left:5px solid #B26A00}.vrec h3{margin:0 0 6px}.vrec .muted{opacity:.75;margin:0 0 6px}.vr-item{border-top:1px solid rgba(0,0,0,.08);padding:8px 0}"+
+ ".vr-item summary{cursor:pointer;font-weight:700}.vr-why{font-weight:500;font-size:13px;color:#b5462a;margin-left:6px}"+
+ ".vr-item video{display:block;width:100%;max-width:720px;margin:10px auto 4px;border-radius:10px;background:#000}";
+document.head.appendChild(st);
+function hook(){ var b=document.getElementById("diagBody"); if(!b) return; new MutationObserver(card).observe(b,{childList:true}); card(); }
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",hook); else hook();
+})();
+</script>
 <script>window.ULAB_TOPIC="vz";</script>
 <script>/* ============================================================
    共用追蹤（四個主題用同一套「走到哪一步」＋「學習紀錄」）
