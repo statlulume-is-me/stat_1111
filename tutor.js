@@ -20,7 +20,10 @@ const CONFIG={
     // 設定方法見「統計小助教_AI代理_說明.md」。留白＝不用代理。
     PROXY_URL:"https://script.google.com/macros/s/AKfycbxU4AYtoSKLUKDcwkWVFwShkcG6BVZJ6Ti6nd9XeMiOKoKegQVPJlNJxVdHss0YPxsX5Q/exec",
     ALLOW_KEY:false,       // 允許學生在小助教裡貼自己的 Gemini 金鑰（2026-11-11 有老師代理了 → 關掉，藏起「🔌 AI」鈕）
-    ALLOW_BUILTIN:true     // 瀏覽器有內建 AI（新版 Chrome）就直接用
+    ALLOW_BUILTIN:true,    // 瀏覽器有內建 AI（新版 Chrome）就直接用
+    // 2026-11-24 使用者：先不要用抓關鍵字 → true＝每一題都直接問 AI；知識庫只在 AI 連不上時當備援。
+    // 想改回「先查知識庫、查不到才問 AI」就改成 false
+    FIRST:true
   },
   TOPICS:{
     kmeans:{name:"K-means 分群",color:"#2A78D6",
@@ -301,18 +304,22 @@ function match(q){
   if(!n) return {a:"打幾個字問我吧，例如「什麼是離群值」。",hit:true};
   if(n.length<=6&&HI.some(h=>n.includes(norm(h)))) return {a:TP.hello+"\n試著問我："+stationChips().join("、"),hit:true};
   if(n.length<=8&&THX.some(h=>n.includes(norm(h)))) return {a:"不客氣～還想知道什麼都可以問。",hit:true};
-  let best=null,bs=0;
-  KB.forEach(e=>{let sc=0;
-    e.k.concat([e.t]).forEach(key=>{const kk=norm(key);if(kk&&n.includes(kk))sc=Math.max(sc,kk.length*2+2);});
+  let best=null,bs=0,blen=0,fuzzy=false;
+  KB.forEach(e=>{let sc=0,ln=0;
+    e.k.concat([e.t]).forEach(key=>{const kk=norm(key);if(kk&&n.includes(kk)&&kk.length*2+2>sc){sc=kk.length*2+2;ln=kk.length;}});
     if(sc){ if(e.topic===TOPIC)sc+=3; else if(e.topic==="common")sc+=1; }
-    if(sc>bs){bs=sc;best=e;}});
+    if(sc>bs){bs=sc;best=e;blen=ln;}});
   if(!best&&n.length>=3){   // 打錯字時：用兩字片段的重疊程度找最像的名詞
     const qb=bigrams(n);
     KB.forEach(e=>e.k.forEach(key=>{const kb=bigrams(norm(key));if(kb.size<2)return;
       let hit=0;kb.forEach(g=>{if(qb.has(g))hit++;});const sc=hit/kb.size;
-      if(sc>=0.67&&sc>bs){bs=sc;best=e;}}));
+      if(sc>=0.67&&sc>bs){bs=sc;best=e;blen=norm(key).length;fuzzy=true;}}));
   }
-  if(best) return {a:best.a,hit:true,entry:best};
+  // 2026-11-24：長問題只「順便提到」某個名詞（例如「要收集哪些欄位」→ 變數的定義）不算真的問到 →
+  // 標 weak：有 AI 時改問 AI、名詞解釋放在下面當延伸；問「什麼是 X／X 是什麼」仍直接回知識庫
+  const askDef=/^(什麼是|什麼叫|何謂|甚麼是)|(是什麼|是甚麼|是啥|什麼意思|的意思|的定義|定義)$/.test(n);
+  const weak=!!best&&!askDef&&n.length>=12&&(fuzzy||blen/n.length<0.34);
+  if(best) return {a:best.a,hit:true,entry:best,weak};
   return {a:"這題超出我的知識庫了。",hit:false};
 }
 
@@ -396,7 +403,7 @@ function aiMenu(){
   if(CONFIG.AI.ALLOW_KEY)keyForm();
 }
 function refreshNote(){
-  note.textContent=aiReady()?"先查知識庫；查不到就問 AI（AI 的回答可能有誤）。":
+  note.textContent=aiReady()?(CONFIG.AI.FIRST?"問題會直接交給 AI 回答（AI 的回答可能有誤）。":"先查知識庫；查不到就問 AI（AI 的回答可能有誤）。"):
     "先查知識庫；查不到會給你搜尋連結"+(CONFIG.AI.ENABLED&&CONFIG.AI.ALLOW_KEY?"，或按「🔌 AI」接上 AI。":"。");
 }
 
@@ -415,23 +422,31 @@ function ask(q){
   setTimeout(async()=>{
     const r=match(q);
     logEv("hint_ask",{q:q.slice(0,80),hit:r.hit,concept:r.entry?r.entry.t:"",topic:TOPIC});
-    if(r.hit){
+    const kbAnswer=()=>{
       add(r.a);
       if(r.entry){small("🔑 一句話："+r.entry.s);
         if(r.entry.topic!=="common"&&r.entry.topic!==TOPIC)small("這是〈"+TOPIC_NAME[r.entry.topic]+"〉主題的內容","stt-tag");
         remember(r.entry);related(r.entry);}
-      return;
-    }
+    };
+    const aiFirst=CONFIG.AI.FIRST&&aiReady();
+    if(r.hit&&(!r.entry||!aiReady()||(!aiFirst&&!r.weak))){kbAnswer();return;}   // 打招呼／空白仍由小助教自己回
     if(aiReady()){
       // 2026-11-11：等待時有跳動的點點＋秒數，久了給安心的話（AI 多半 3–5 秒，偶爾 30 秒）
       const wait=add("");wait.classList.add("stt-think");
-      wait.innerHTML='🤔 知識庫裡沒有，AI 思考中<span class="stt-dots"><i>.</i><i>.</i><i>.</i></span> <span class="stt-sec"></span><div class="stt-hint"></div>';
+      wait.innerHTML='🤔 '+(r.hit||aiFirst?'':'知識庫裡沒有，')+'AI 思考中<span class="stt-dots"><i>.</i><i>.</i><i>.</i></span> <span class="stt-sec"></span><div class="stt-hint"></div>';
       const t0=Date.now(),sec=wait.querySelector(".stt-sec"),hint=wait.querySelector(".stt-hint");
       const tick=setInterval(()=>{const s=Math.round((Date.now()-t0)/1000);sec.textContent=s>=2?s+" 秒":"";
         hint.textContent=s>=25?"快好了，再撐一下 🙏（超過 45 秒會改給你查詢連結）":s>=10?"這題 AI 想得比較久，通常再幾秒就好～":"";if(s>=10)scroll();},1000);
       wait.remove=(r=>function(){clearInterval(tick);r.call(this);})(wait.remove);
-      try{const ai=await askAI(q);wait.remove();add(ai.text);small("🌐 由"+ai.via+"回答，可能有誤，重要的事請再查證。","stt-tag");logEv("tutor_ai",{ok:1,via:ai.via});}
-      catch(e){wait.remove();add("連 AI 失敗了（"+e.message.slice(0,80)+"）。先用下面的連結：");links(q);logEv("tutor_ai",{ok:0});}
+      try{const ai=await askAI(q);wait.remove();add(ai.text);small("🌐 由"+ai.via+"回答，可能有誤，重要的事請再查證。","stt-tag");logEv("tutor_ai",{ok:1,via:ai.via});
+        if(r.entry&&!aiFirst){const e=r.entry;buttons([["💡 名詞解釋："+e.t,()=>ask(e.t)]]);}}
+      catch(e){wait.remove();logEv("tutor_ai",{ok:0,err:String(e.message||"").slice(0,60)});
+        // 2026-11-24 使用者：AI 過載／太久／額度用完 → 顯示「助教現在很忙，等等再問」＋再問一次鈕（不顯示看不懂的錯誤碼）
+        const m=String(e.message||"");
+        add(/額度用完/.test(m)?"😵 小助教今天被問太多次，AI 額度用完了，明天再來問我吧！":
+            "😵 小助教現在太忙了（AI 過載中），請等 30 秒左右再問一次 🙏","bot","stt-busy");
+        buttons([["🔄 再問一次",()=>ask(q)]]);
+        if(r.hit&&r.entry&&!r.weak){small("先給你知識庫裡的簡短說明：","stt-tag");kbAnswer();}}   // 只在明確問名詞時才附（長問題順便提到的詞不附，避免答非所問）
     }else{
       add(r.a+"可以換個說法，或用下面的連結查：");links(q);
       if(CONFIG.AI.ENABLED&&CONFIG.AI.ALLOW_KEY)buttons([["🔌 讓我直接問 AI",aiMenu]]);
@@ -451,7 +466,7 @@ window.addEventListener("stt-station",e=>{const s=e.detail||null;if(s===station)
 function open(){
   panel.hidden=false;fab.hidden=true;snd("click");
   if(!greeted){greeted=true;add(TP.hello);
-    if(aiReady())small("已接上 AI：知識庫查不到的題目會直接問它。","stt-tag");
+    if(aiReady())small(CONFIG.AI.FIRST?"已接上 AI：你問的每一題都會直接請 AI 回答。":"已接上 AI：知識庫查不到的題目會直接問它。","stt-tag");
     renderChips();
     refreshNote();logEv("tutor_open",{topic:TOPIC,station:station||""});}
   setTimeout(()=>{try{input.focus();}catch(e){}},60);
