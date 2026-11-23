@@ -319,7 +319,9 @@ function match(q){
   // 標 weak：有 AI 時改問 AI、名詞解釋放在下面當延伸；問「什麼是 X／X 是什麼」仍直接回知識庫
   const askDef=/^(什麼是|什麼叫|何謂|甚麼是)|(是什麼|是甚麼|是啥|什麼意思|的意思|的定義|定義)$/.test(n);
   const weak=!!best&&!askDef&&n.length>=12&&(fuzzy||blen/n.length<0.34);
-  if(best) return {a:best.a,hit:true,entry:best,weak};
+  // sure：明確在問這個名詞（「什麼是 X」或問題幾乎就是名詞本身）→ AI 失敗時才敢拿知識庫答案當備援
+  const sure=!!best&&!fuzzy&&(askDef||blen/n.length>=0.6);
+  if(best) return {a:best.a,hit:true,entry:best,weak,sure};
   return {a:"這題超出我的知識庫了。",hit:false};
 }
 
@@ -348,8 +350,8 @@ const aiReady=()=>CONFIG.AI.ENABLED&&(!!CONFIG.AI.PROXY_URL||AI.builtin||!!AI.ke
     if(LM&&LM.availability){const a=await LM.availability();AI.builtin=(a&&a!=="unavailable");}}catch(e){}
 })();
 async function viaProxy(q){
-  // 等超過 45 秒就放棄，改走下一條路（避免學生一直等；實測多數 3–5 秒，偶爾 30 秒以上）
-  const ac=window.AbortController?new AbortController():null;const tm=ac?setTimeout(()=>ac.abort(),45000):0;
+  // 等超過 60 秒就放棄（實測熱的時候 5–7 秒；很久沒人用時第一題可能 45 秒以上 → 2026-11-24 從 45 秒放寬到 60 秒）
+  const ac=window.AbortController?new AbortController():null;const tm=ac?setTimeout(()=>ac.abort(),60000):0;
   let r;try{r=await fetch(CONFIG.AI.PROXY_URL,{method:"POST",credentials:"omit",redirect:"follow",signal:ac?ac.signal:undefined,
     headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"ask",topic:TOPIC,q:q.slice(0,300)})});}
   catch(e){throw new Error(e&&e.name==="AbortError"?"AI 想太久了，先看看下面的連結":(e.message||"連不到 AI"));}
@@ -436,7 +438,7 @@ function ask(q){
       wait.innerHTML='🤔 '+(r.hit||aiFirst?'':'知識庫裡沒有，')+'AI 思考中<span class="stt-dots"><i>.</i><i>.</i><i>.</i></span> <span class="stt-sec"></span><div class="stt-hint"></div>';
       const t0=Date.now(),sec=wait.querySelector(".stt-sec"),hint=wait.querySelector(".stt-hint");
       const tick=setInterval(()=>{const s=Math.round((Date.now()-t0)/1000);sec.textContent=s>=2?s+" 秒":"";
-        hint.textContent=s>=25?"快好了，再撐一下 🙏（超過 45 秒會改給你查詢連結）":s>=10?"這題 AI 想得比較久，通常再幾秒就好～":"";if(s>=10)scroll();},1000);
+        hint.textContent=s>=25?"小助教剛睡醒，第一題會比較慢，再撐一下 🙏":s>=10?"這題 AI 想得比較久，通常再幾秒就好～":"";if(s>=10)scroll();},1000);
       wait.remove=(r=>function(){clearInterval(tick);r.call(this);})(wait.remove);
       try{const ai=await askAI(q);wait.remove();add(ai.text);small("🌐 由"+ai.via+"回答，可能有誤，重要的事請再查證。","stt-tag");logEv("tutor_ai",{ok:1,via:ai.via});
         if(r.entry&&!aiFirst){const e=r.entry;buttons([["💡 名詞解釋："+e.t,()=>ask(e.t)]]);}}
@@ -446,7 +448,7 @@ function ask(q){
         add(/額度用完/.test(m)?"😵 小助教今天被問太多次，AI 額度用完了，明天再來問我吧！":
             "😵 小助教現在太忙了（AI 過載中），請等 30 秒左右再問一次 🙏","bot","stt-busy");
         buttons([["🔄 再問一次",()=>ask(q)]]);
-        if(r.hit&&r.entry&&!r.weak){small("先給你知識庫裡的簡短說明：","stt-tag");kbAnswer();}}   // 只在明確問名詞時才附（長問題順便提到的詞不附，避免答非所問）
+        if(r.hit&&r.entry&&r.sure){small("先給你知識庫裡的簡短說明：","stt-tag");kbAnswer();}}   // 只在明確問名詞時才附（長問題順便提到的詞不附，避免答非所問）
     }else{
       add(r.a+"可以換個說法，或用下面的連結查：");links(q);
       if(CONFIG.AI.ENABLED&&CONFIG.AI.ALLOW_KEY)buttons([["🔌 讓我直接問 AI",aiMenu]]);
@@ -466,6 +468,9 @@ window.addEventListener("stt-station",e=>{const s=e.detail||null;if(s===station)
 function open(){
   panel.hidden=false;fab.hidden=true;snd("click");
   if(!greeted){greeted=true;add(TP.hello);
+    // 2026-11-24 暖機：一打開小助教就先叫醒代理（送空白問題 → 代理在呼叫 Gemini 之前就回「沒有問題」，不花 AI 額度）
+    if(CONFIG.AI.ENABLED&&CONFIG.AI.PROXY_URL){try{fetch(CONFIG.AI.PROXY_URL,{method:"POST",credentials:"omit",redirect:"follow",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"ask",topic:TOPIC,q:""})}).catch(()=>{});}catch(e){}}
     if(aiReady())small(CONFIG.AI.FIRST?"已接上 AI：你問的每一題都會直接請 AI 回答。":"已接上 AI：知識庫查不到的題目會直接問它。","stt-tag");
     renderChips();
     refreshNote();logEv("tutor_open",{topic:TOPIC,station:station||""});}
