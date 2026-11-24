@@ -298,20 +298,24 @@ window.__BLK=(function(){
     return h;
   }
   /* 答錯當下：直接附一支（收合、不預先下載）同觀念的補救影片 */
+  function vbox(v){
+    return '<details class="blk-vi" style="margin:10px 0 0;padding:8px 12px;border-radius:10px;background:rgba(128,128,128,.07)"><summary style="cursor:pointer;font-weight:700">📺 這題的觀念影片：'+esc(v.t)+'（'+vlen(v)+'，點開看）</summary>'+
+        vtag(v,'none',640)+'</details>';
+  }
   function vidInline(topic,t,id){
     var V=VIDS[topic]||[], h="";
-    V.forEach(function(v){ if(!hit(v,t,id)) return;
-      h+='<details class="blk-vi" style="margin:10px 0 0;padding:8px 12px;border-radius:10px;background:rgba(128,128,128,.07)"><summary style="cursor:pointer;font-weight:700">📺 補救影片：'+esc(v.t)+'（'+vlen(v)+'，點開看）</summary>'+
-        vtag(v,'none',640)+'</details>'; });
+    V.forEach(function(v){ if(hit(v,t,id)) h+=vbox(v); });
     return h;
   }
+  /* 2026-11-24：直接指定第幾支（決策樹題庫練習的題目只有「主題 1–10」，對到同順序的 10 支影片） */
+  function vidAt(topic,i){ var v=(VIDS[topic]||[])[i]; return v?vbox(v):""; }
   function openVid(topic,i){
     var d=document.getElementById("blkv-"+topic+"-"+i); if(!d) return false;
     d.open=true; try{ d.scrollIntoView({block:"center",behavior:"smooth"}); }catch(e){ d.scrollIntoView(); }
     try{ if(window.ULAB&&ULAB.ev) ULAB.ev("blk_vid_link",{topic:topic,i:i+1}); }catch(e){}
     return false;
   }
-  return {C:C,NAME:NAME,init:init,pick:pick,record:record,done:done,tag:tag,tagText:tagText,fbHTML:fbHTML,pathHTML:pathHTML,band:band,vidHTML:vidHTML,vidLink:vidLink,vidInline:vidInline,openVid:openVid,ab:ab};
+  return {C:C,NAME:NAME,init:init,pick:pick,record:record,done:done,tag:tag,tagText:tagText,fbHTML:fbHTML,pathHTML:pathHTML,band:band,vidHTML:vidHTML,vidLink:vidLink,vidInline:vidInline,vidAt:vidAt,openVid:openVid,ab:ab};
 })();
 </script>
 <style>/* 背景花紋只在兩側（做上線版.py 加的） */body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cg fill='%2317798E'%3E%3Ccircle cx='40' cy='120' r='5'/%3E%3Ccircle cx='70' cy='92' r='4'/%3E%3Ccircle cx='98' cy='84' r='5'/%3E%3Ccircle cx='128' cy='52' r='4'/%3E%3C/g%3E%3Cline x1='28' y1='128' x2='142' y2='44' stroke='%2317798E' stroke-width='2.5'/%3E%3Cg fill='%2317798E'%3E%3Ccircle cx='220' cy='300' r='5'/%3E%3Ccircle cx='250' cy='272' r='4'/%3E%3Ccircle cx='282' cy='262' r='5'/%3E%3Ccircle cx='310' cy='232' r='4'/%3E%3C/g%3E%3Cline x1='208' y1='308' x2='324' y2='224' stroke='%2317798E' stroke-width='2.5'/%3E%3C/svg%3E");background-size:360px 360px;opacity:0.16;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(50% - 440px),transparent calc(50% - 400px),transparent calc(50% + 400px),#000 calc(50% + 440px),#000 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(50% - 440px),transparent calc(50% - 400px),transparent calc(50% + 400px),#000 calc(50% + 440px),#000 100%)}</style>
@@ -355,7 +359,7 @@ window.__BLK=(function(){
         <span class="mode-d">共 20 題，大約 12 分鐘。每 4 題一組：答對 3 題以上升一級、1 題以下降一級。</span></label>
       <label class="mode"><input type="radio" name="mode" value="pre">
         <span class="mode-t">前測</span>
-        <span class="mode-d">固定 12 題，在上課或玩實驗之前做。作答時不會顯示解答。</span></label>
+        <span class="mode-d">固定 12 題，在上課或玩實驗之前做。每題答完馬上給解答。</span></label>
       <label class="mode"><input type="radio" name="mode" value="post">
         <span class="mode-t">後測</span>
         <span class="mode-d">另一份難度相同的 12 題，學完之後做，用來和前測比較。</span></label>
@@ -592,7 +596,7 @@ function submit(conf){
   log("submit",q.id,{chosen:row.chosen,correct:row.correct,mis,conf});
   $("qConf").hidden=true;
   // 前後測不給解答，直接下一題
-  if(S.phase==="main"&&(S.mode==="pre"||S.mode==="post")){advance();return;}
+  /* 2026-11-24：前後測也馬上給答案（原本直接下一題） */
   const btns=[...$("qOpts").children];
   btns.forEach((b,j)=>{b.disabled=true;
     if(c.perm[j]===q.k)b.classList.add("is-ok");

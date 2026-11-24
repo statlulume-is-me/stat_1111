@@ -793,20 +793,24 @@ window.__BLK=(function(){
     return h;
   }
   /* 答錯當下：直接附一支（收合、不預先下載）同觀念的補救影片 */
+  function vbox(v){
+    return '<details class="blk-vi" style="margin:10px 0 0;padding:8px 12px;border-radius:10px;background:rgba(128,128,128,.07)"><summary style="cursor:pointer;font-weight:700">📺 這題的觀念影片：'+esc(v.t)+'（'+vlen(v)+'，點開看）</summary>'+
+        vtag(v,'none',640)+'</details>';
+  }
   function vidInline(topic,t,id){
     var V=VIDS[topic]||[], h="";
-    V.forEach(function(v){ if(!hit(v,t,id)) return;
-      h+='<details class="blk-vi" style="margin:10px 0 0;padding:8px 12px;border-radius:10px;background:rgba(128,128,128,.07)"><summary style="cursor:pointer;font-weight:700">📺 補救影片：'+esc(v.t)+'（'+vlen(v)+'，點開看）</summary>'+
-        vtag(v,'none',640)+'</details>'; });
+    V.forEach(function(v){ if(hit(v,t,id)) h+=vbox(v); });
     return h;
   }
+  /* 2026-11-24：直接指定第幾支（決策樹題庫練習的題目只有「主題 1–10」，對到同順序的 10 支影片） */
+  function vidAt(topic,i){ var v=(VIDS[topic]||[])[i]; return v?vbox(v):""; }
   function openVid(topic,i){
     var d=document.getElementById("blkv-"+topic+"-"+i); if(!d) return false;
     d.open=true; try{ d.scrollIntoView({block:"center",behavior:"smooth"}); }catch(e){ d.scrollIntoView(); }
     try{ if(window.ULAB&&ULAB.ev) ULAB.ev("blk_vid_link",{topic:topic,i:i+1}); }catch(e){}
     return false;
   }
-  return {C:C,NAME:NAME,init:init,pick:pick,record:record,done:done,tag:tag,tagText:tagText,fbHTML:fbHTML,pathHTML:pathHTML,band:band,vidHTML:vidHTML,vidLink:vidLink,vidInline:vidInline,openVid:openVid,ab:ab};
+  return {C:C,NAME:NAME,init:init,pick:pick,record:record,done:done,tag:tag,tagText:tagText,fbHTML:fbHTML,pathHTML:pathHTML,band:band,vidHTML:vidHTML,vidLink:vidLink,vidInline:vidInline,vidAt:vidAt,openVid:openVid,ab:ab};
 })();
 </script>
 <style>/* 做上線版.py 加的 */.vid-local{display:none!important}</style>
@@ -3520,7 +3524,7 @@ function answerPrac(i){
   if(Object.keys(PR.ans).filter(k=>PR.ans[k].first).length>=10){ missionMark('q-prac',2); missionDone('q-prac'); }
   logEv('prac','練習 #'+q.id, {correct:ok?1:0, topic:PB_TOPIC(q.topic), sec:+sec.toFixed(2), redo:PR.redo?1:0});
   pracRoot.querySelectorAll('.opt').forEach(function(b,j){ b.disabled=true; if(PR.opts[j]===key) b.classList.add('correct'); else if(j===i) b.classList.add('wrong'); else b.classList.add('dim'); });
-  document.getElementById('pr-fb').innerHTML='<div class="feedback '+(ok?'ok':'bad')+'"><span class="vd">'+(ok?'答對了':'答錯了，正確答案是「'+esc(q.opts[key])+'」')+'</span><p>'+esc(q.ex)+'</p></div>'+
+  document.getElementById('pr-fb').innerHTML='<div class="feedback '+(ok?'ok':'bad')+'"><span class="vd">'+(ok?'答對了':'答錯了，正確答案是「'+esc(q.opts[key])+'」')+'</span><p>'+esc(q.ex)+'</p></div>'+(!ok&&window.__BLK?__BLK.vidAt('dt',PB_TOPIC(q.topic)-1):'')+
     '<div class="actions" style="margin-top:12px"><button class="btn" id="pr-next">'+(PR.i+1>=PR.list.length?'看結果':'下一題')+'</button></div>';
   document.getElementById('pr-next').addEventListener('click',()=>{ PR.i++; showPracQ(); });
   checkS8();

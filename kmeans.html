@@ -747,22 +747,42 @@ window.__BLK=(function(){
     return h;
   }
   /* 答錯當下：直接附一支（收合、不預先下載）同觀念的補救影片 */
+  function vbox(v){
+    return '<details class="blk-vi" style="margin:10px 0 0;padding:8px 12px;border-radius:10px;background:rgba(128,128,128,.07)"><summary style="cursor:pointer;font-weight:700">📺 這題的觀念影片：'+esc(v.t)+'（'+vlen(v)+'，點開看）</summary>'+
+        vtag(v,'none',640)+'</details>';
+  }
   function vidInline(topic,t,id){
     var V=VIDS[topic]||[], h="";
-    V.forEach(function(v){ if(!hit(v,t,id)) return;
-      h+='<details class="blk-vi" style="margin:10px 0 0;padding:8px 12px;border-radius:10px;background:rgba(128,128,128,.07)"><summary style="cursor:pointer;font-weight:700">📺 補救影片：'+esc(v.t)+'（'+vlen(v)+'，點開看）</summary>'+
-        vtag(v,'none',640)+'</details>'; });
+    V.forEach(function(v){ if(hit(v,t,id)) h+=vbox(v); });
     return h;
   }
+  /* 2026-11-24：直接指定第幾支（決策樹題庫練習的題目只有「主題 1–10」，對到同順序的 10 支影片） */
+  function vidAt(topic,i){ var v=(VIDS[topic]||[])[i]; return v?vbox(v):""; }
   function openVid(topic,i){
     var d=document.getElementById("blkv-"+topic+"-"+i); if(!d) return false;
     d.open=true; try{ d.scrollIntoView({block:"center",behavior:"smooth"}); }catch(e){ d.scrollIntoView(); }
     try{ if(window.ULAB&&ULAB.ev) ULAB.ev("blk_vid_link",{topic:topic,i:i+1}); }catch(e){}
     return false;
   }
-  return {C:C,NAME:NAME,init:init,pick:pick,record:record,done:done,tag:tag,tagText:tagText,fbHTML:fbHTML,pathHTML:pathHTML,band:band,vidHTML:vidHTML,vidLink:vidLink,vidInline:vidInline,openVid:openVid,ab:ab};
+  return {C:C,NAME:NAME,init:init,pick:pick,record:record,done:done,tag:tag,tagText:tagText,fbHTML:fbHTML,pathHTML:pathHTML,band:band,vidHTML:vidHTML,vidLink:vidLink,vidInline:vidInline,vidAt:vidAt,openVid:openVid,ab:ab};
 })();
 </script>
+<style>/* 2026-11-24 K-means 小診斷：每題答完的回饋（套用新題庫.py 加的） */
+#cat-app .opt.fb-ok{border-color:#1baf7a;background:rgba(27,175,122,.12)}
+#cat-app .opt.fb-ok .k{background:#1baf7a;color:#fff}
+#cat-app .opt.fb-no{border-color:#eb6834;background:rgba(235,104,52,.12)}
+#cat-app .opt.fb-no .k{background:#eb6834;color:#fff}
+#cat-app .opt.fb-dim{opacity:.5}
+#cat-app .opt.fb-ok,#cat-app .opt.fb-no{opacity:1;color:inherit}
+#cat-app .opt:disabled{cursor:default;transform:none}
+#cat-app .cat-fb{color:inherit;font-weight:400;margin-top:14px;padding:12px 14px;border-radius:12px;border-left:5px solid #1baf7a;background:rgba(27,175,122,.07);line-height:1.65}
+#cat-app .cat-fb.fb-bad{border-left-color:#eb6834;background:rgba(235,104,52,.07)}
+#cat-app .cat-fb .h{font-weight:700;font-size:16px}
+#cat-app .cat-fb.fb-bad .h{color:#c0461b}
+#cat-app .cat-fb.fb-good .h{color:#138a5e}
+#cat-app .cat-fb .ex{margin-top:6px}
+#cat-app .cat-fb .mis{margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(128,128,128,.08);font-size:14.5px}
+</style>
 <style>/* 做上線版.py 加的 */.topbar-inner{max-width:min(1260px,100%);box-sizing:border-box;overflow-x:auto;scrollbar-width:none}.topbar-inner::-webkit-scrollbar{display:none}</style>
 <style>/* 十步標籤統一（做上線版.py 加的） */
 .u-row{margin:0 0 10px}
@@ -1518,13 +1538,9 @@ window.__BLK=(function(){
 <section id="page-quiz" hidden>
   <div class="pagehead"><div class="u-row"><span class="u-step" style="--u:#2a78d6"><b>STEP 8</b>學習挑戰</span></div><span style="display:none" class="stepno">STEP 8 · 學習挑戰</span></div>
   <h1>學習挑戰：適性測驗</h1>
-  <div class="sub">一個會「看你程度出題」的測驗：答對變難、答錯變簡單。答完，結果會交給下一步的學習診斷</div>
+  <div class="sub">一個會「看你程度出題」的測驗：每 4 題一組升降級，每題答完馬上給答案。答完，結果會交給下一步的學習診斷</div>
   <div id="cat-app"></div>
   <div id="cat-dbg" hidden></div>
-  <details class="card" id="quiz-extra">
-    <summary style="cursor:pointer;font-weight:700">🎯 加碼挑戰：6 題練習＋當一次「裁判」<span class="muted" style="font-weight:400">（不列入診斷，答了會馬上告訴你對錯）</span></summary>
-    <div id="quiz-root" style="margin-top:12px"></div>
-  </details>
 </section>
 
 <!-- ============ 關於 ============ -->
@@ -3947,7 +3963,7 @@ const CATM = (function catModule(){
                <li>題目是隨機抽的，<b>每個人的題目都不一樣</b>。</li>`
             : `<li>共 <b>20 題</b>、8 分鐘左右，每題選一個答案，再點你有多確定。</li>
                <li>每 4 題一組：一組答對 3 題以上<b>升一級</b>、1 題以下<b>降一級</b>、其他維持（從中級開始，共三級），所以<b>每個人的題目都不一樣</b>。</li>`}
-          <li>作答中不公布對錯；答完給你程度，並把結果交給下一步的 <b>⑨ 學習診斷</b>——整理出<b>五種數據能力雷達圖</b>、<b>容易卡住的觀念</b>，再帶你回去補。</li>
+          ${CFG.FORM==="cal"?"<li>作答中不公布對錯；":"<li>每題答完<b>馬上告訴你對錯和解析</b>，答錯會附上這題觀念的影片；"}20 題答完給你程度，並把結果交給下一步的 <b>⑨ 學習診斷</b>——整理出<b>五種數據能力雷達圖</b>、<b>容易卡住的觀念</b>，再帶你回去補。</li>
           <li>不會就選「我不知道」，比亂猜更能測準。</li>
         </ul>
         ${lastTxt?`<p class="muted" style="margin:10px 0 0">${lastTxt}</p>`:""}
@@ -3979,7 +3995,7 @@ const CATM = (function catModule(){
     $app.innerHTML=`
       <div class="prog"><span>第 ${n} 題</span><div class="track"><div class="fill" style="width:${Math.min(100,(n-1)/LIMIT()*100)}%"></div></div><span>${CFG.FORM==="cal"||window.__BLK?"共":"最多"} ${LIMIT()}</span></div>
       <div class="card qcard">
-        ${S.blk?__BLK.fbHTML(S.blk,{noScore:true}):""}${S.blk?__BLK.tag(S.blk):""}<span class="tag">${esc(it.concept)}</span>
+        ${S.blk?__BLK.tag(S.blk):""}<span class="tag">${esc(it.concept)}</span>
         <div class="stem">${esc(it.stem)}</div>
         <div>
           ${opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="k">${LETTERS[i]}</span><span>${esc(o.t)}</span></button>`).join("")}
@@ -4016,8 +4032,33 @@ const CATM = (function catModule(){
       pick:pk, correct:correct?1:0, conf:conf||"", rt_ms:rt, n:S.resp.length,
       theta:+S.theta.toFixed(3), se:+S.se.toFixed(3), reason:cur.reason});
     const why=CAT.stopReason(S);
-    if(why) finish(why); else ask();
+    if(CFG.FORM==="cal"){ if(why) finish(why); else ask(); return; }
+    feedback(it,pk,correct,why);
   }
+
+  function feedback(it,pk,correct,why){
+    state="feedback";
+    $app.querySelectorAll(".opt").forEach(b=>{
+      b.disabled=true; const i=b.dataset.i, k=i==="idk"?"idk":cur.opts[+i].k;
+      if(k==="correct") b.classList.add("fb-ok"); else if(i===String(cur.pick)) b.classList.add("fb-no"); else b.classList.add("fb-dim");
+    });
+    const cb=document.getElementById("cat-conf"); if(cb) cb.innerHTML="";
+    const m=!correct&&it.misconception&&BANK.misconceptions[it.misconception];
+    const h=`<div class="cat-fb ${correct?"fb-good":"fb-bad"}" aria-live="polite">
+        <div class="h">${correct?"✅ 答對了！":(pk==="idk"?"沒關係，正確答案是：":"❌ 不對，正確答案是：")}${correct?"":`<b>${esc(it.correct)}</b>`}</div>
+        <div class="ex">📖 ${esc(it.explanation)}</div>
+        ${m?`<div class="mis">💡 這題常見的迷思：${esc(m.text.replace(/^誤以為\s*/,"以為").replace(/^混淆\s*/,"搞混了"))}<br><b>其實：</b>${esc(m.fix)}</div>`:""}
+        ${S.blk?__BLK.fbHTML(S.blk):""}
+        ${!correct&&window.__BLK?__BLK.vidInline("km",it.qtype):""}
+        <div style="margin-top:12px"><button class="btn primary" id="cat-next">${why?"看診斷結果 →":"下一題 →"}</button></div>
+      </div>`;
+    $app.querySelector(".qcard").insertAdjacentHTML("beforeend",h);
+    $app.querySelectorAll(".cat-fb details.blk-vi").forEach(d=>d.addEventListener("toggle",()=>{ if(d.open) LOG.ev("cat_vid_open",{item:it.id, qtype:it.qtype}); }));
+    const nb=document.getElementById("cat-next");
+    nb.onclick=()=>{ if(why) finish(why); else ask(); };
+    try{ nb.focus({preventScroll:true}); }catch(e){}
+  }
+
 
   function bandOf(th){
     if(th<-1) return ["入門","先把「分群在做什麼」弄清楚，會輕鬆很多。"];
@@ -4189,9 +4230,10 @@ wrong=${JSON.stringify(S.wrong)}  right=${JSON.stringify(S.right)}  probes=${S.p
   };
 })();
 document.querySelectorAll("a.cat-link").forEach(a=>a.href=a.dataset.q+"#quiz");
-document.getElementById("quiz-extra").addEventListener("toggle",e=>{ if(e.target.open) LOG.ev("quiz_extra_open"); });
+/* 2026-11-24 加碼挑戰已拿掉 */
 function quizRender(){
   const root=document.getElementById("quiz-root");
+  if(!root) return;   /* 加碼挑戰已拿掉 */
   if(!qz.started){
     root.innerHTML=`<div class="card" style="text-align:center">
       <h4>準備好了嗎？</h4>
@@ -4616,8 +4658,7 @@ function renderNext(){
   // 3) 真資料
   h+=`<h3>📍 用真實資料練習</h3><div class="pathgrid">
     <div class="pathcard"><span class="no">任務 A</span><h4>在全台尺度找你的區</h4><p>切到「全台 95 區」，看看你在①找到的區，在不同 k 下被分到哪一型。k 變了，它的鄰居換了嗎？</p><button class="btn primary" id="nx-real-all">去全台資料 →</button></div>
-    <div class="pathcard"><span class="no">任務 B</span><h4>在真資料上搞亂看看</h4><p>塞一個爆量的假行政區進去，預測分群會怎麼歪，再按下去驗證。</p><button class="btn primary" id="nx-real-chaos">去搞亂真資料 →</button></div>
-    <div class="pathcard"><span class="no">任務 C</span><h4>當一次「裁判」</h4><p>「這三區是雙北住宅竊盜最嚴重的地方」——這句話錯在哪？到測驗頁的加碼挑戰試試。</p><button class="btn primary" data-goto="quiz">去加碼挑戰 →</button></div></div>`;
+    <div class="pathcard"><span class="no">任務 B</span><h4>在真資料上搞亂看看</h4><p>塞一個爆量的假行政區進去，預測分群會怎麼歪，再按下去驗證。</p><button class="btn primary" id="nx-real-chaos">去搞亂真資料 →</button></div></div>`;
   // 4) 延伸路線
   h+=`<h3>🧭 學完之後，可以往哪裡走</h3><ol class="roadmap">
     <li><div><b>把 K-means 用穩：多個起點、標準化、檢驗</b><span>nstart／n_init、StandardScaler、輪廓係數、換樣本重跑看穩不穩。</span></div></li>
