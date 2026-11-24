@@ -187,7 +187,7 @@ window.__QT=function(rows,types,color){
 <script>/* 每 4 題一組的升降級規則＋補救影片（套用新題庫.py 加的，2026-11-23）
    一組答對 ≥UP 題升一級、≤DOWN 題降一級、其他維持；答完 MAX 題停止。難度 1–3 級＝「最終難度」Excel */
 window.__BLK=(function(){
-  var C={"SIZE": 4, "MAX": 20, "START": 2, "UP": 3, "DOWN": 1, "LO": 1, "HI": 3}, VIDS={"km": [{"f": "km_t1_basic", "t": "分群基本概念"}, {"f": "km_t2_distance", "t": "距離與資料前處理"}, {"f": "km_t3_choose_k", "t": "選擇 K 與分群評估"}, {"f": "km_t4_algorithm", "t": "演算法流程與計算"}, {"f": "km_t5_init_limits", "t": "初始化、限制與進階方法"}], "vz": [{"f": "vz_t1_chart_type", "t": "圖表類型選擇"}, {"f": "vz_t2_purpose_data", "t": "視覺化目的與資料型態"}, {"f": "vz_t3_misleading", "t": "誤導圖表與指標設計"}, {"f": "vz_t4_design_color", "t": "圖表設計與配色"}, {"f": "vz_t5_stats_advanced", "t": "統計解讀與進階圖表"}], "dt": [{"f": "dt_t01_basic", "t": "基本概念與結構", "ids": [12, 3, 1, 2, 101, 16, 17, 19, 20, 25, 6, 27, 104, 9, 14, 26, 28, 30, 56, 107], "ab": true}, {"f": "dt_t02_split", "t": "分裂準則與不純度", "ids": [102, 4, 22, 34, 40, 50, 55, 35, 36, 37, 39, 65, 41, 42, 69, 70, 83, 84, 86, 93, 111], "ab": true}, {"f": "dt_t03_regtree", "t": "迴歸樹", "ids": [24, 29, 7, 108, 52, 92], "ab": true}, {"f": "dt_t04_algo", "t": "演算法比較", "ids": [100, 68, 74, 75, 69, 95], "ab": true}, {"f": "dt_t05_prune", "t": "過度配適與剪枝", "ids": [15, 32, 43, 44, 45, 57, 63, 76, 87], "ab": true}, {"f": "dt_t06_pros", "t": "優點與適用情境", "ids": [8, 64, 78, 99], "ab": true}, {"f": "dt_t07_cons", "t": "缺點與限制", "ids": [85, 110, 80, 46, 71, 82, 98], "ab": true}, {"f": "dt_t08_ensemble", "t": "集成學習延伸", "ids": [79, 88, 89, 90, 109], "ab": true}, {"f": "dt_t09_eval", "t": "模型評估與驗證", "ids": [51, 59, 60, 72, 73, 91, 97, 58, 96, 94], "ab": true}, {"f": "dt_t10_practice", "t": "實務應用與解釋", "ids": [95, 18, 103, 105, 106, 62, 48, 49, 66, 67, 31, 81, 53, 77, 80], "ab": true}], "reg": [{"f": "reg_t1_basic_scatter", "t": "基本概念與散佈圖"}, {"f": "reg_t2_line_predict", "t": "迴歸線與預測"}, {"f": "reg_t3_correlation", "t": "相關係數與關係強弱"}, {"f": "reg_t4_outlier_diag", "t": "離群值與模型診斷"}, {"f": "reg_t5_causal", "t": "因果與混淆陷阱"}, {"f": "reg_t6_advanced", "t": "進階觀念", "ids": ["R0407", "R0409", "R0411", "R0609", "R0313", "R1209", "R0413", "R1007", "R0314", "R1210"]}]}, NAME={1:"初級",2:"中級",3:"高級"}, COL={1:"#1a9e6e",2:"#c98a00",3:"#d4572a"};
+  var C={"SIZE": 4, "MAX": 20, "START": 2, "UP": 3, "DOWN": 1, "LO": 1, "HI": 3}, VIDS={"km": [{"f": "km_t1_basic", "t": "分群基本概念", "len": "約 1 分鐘"}, {"f": "km_t2_distance", "t": "距離與資料前處理", "len": "約 1 分鐘"}, {"f": "km_t3_choose_k", "t": "選擇 K 與分群評估", "len": "約 1 分鐘"}, {"f": "km_t4_algorithm", "t": "演算法流程與計算", "len": "約 1 分鐘"}, {"f": "km_t5_init_limits", "t": "初始化、限制與進階方法", "len": "約 1 分鐘"}], "vz": [{"f": "vz_t1_chart_type", "t": "圖表類型選擇", "len": "約 4 分鐘"}, {"f": "vz_t2_purpose_data", "t": "視覺化目的與資料型態", "len": "約 2 分鐘"}, {"f": "vz_t3_misleading", "t": "誤導圖表與指標設計", "len": "約 4 分鐘"}, {"f": "vz_t4_design_color", "t": "圖表設計與配色", "len": "約 3 分鐘"}, {"f": "vz_t5_stats_advanced", "t": "統計解讀與進階圖表", "len": "約 4 分鐘"}], "dt": [{"f": "dt_t01_basic", "t": "基本概念與結構", "ids": [12, 3, 1, 2, 101, 16, 17, 19, 20, 25, 6, 27, 104, 9, 14, 26, 28, 30, 56, 107], "ab": true, "len": "2 個版本・各約 3 分鐘"}, {"f": "dt_t02_split", "t": "分裂準則與不純度", "ids": [102, 4, 22, 34, 40, 50, 55, 35, 36, 37, 39, 65, 41, 42, 69, 70, 83, 84, 86, 93, 111], "ab": true, "len": "2 個版本・各約 3 分鐘"}, {"f": "dt_t03_regtree", "t": "迴歸樹", "ids": [24, 29, 7, 108, 52, 92], "ab": true, "len": "2 個版本・各約 2–3 分鐘"}, {"f": "dt_t04_algo", "t": "演算法比較", "ids": [100, 68, 74, 75, 69, 95], "ab": true, "len": "2 個版本・各約 2–3 分鐘"}, {"f": "dt_t05_prune", "t": "過度配適與剪枝", "ids": [15, 32, 43, 44, 45, 57, 63, 76, 87], "ab": true, "len": "2 個版本・各約 2–3 分鐘"}, {"f": "dt_t06_pros", "t": "優點與適用情境", "ids": [8, 64, 78, 99], "ab": true, "len": "2 個版本・各約 2–3 分鐘"}, {"f": "dt_t07_cons", "t": "缺點與限制", "ids": [85, 110, 80, 46, 71, 82, 98], "ab": true, "len": "2 個版本・各約 2–3 分鐘"}, {"f": "dt_t08_ensemble", "t": "集成學習延伸", "ids": [79, 88, 89, 90, 109], "ab": true, "len": "2 個版本・各約 2–3 分鐘"}, {"f": "dt_t09_eval", "t": "模型評估與驗證", "ids": [51, 59, 60, 72, 73, 91, 97, 58, 96, 94], "ab": true, "len": "2 個版本・各約 3 分鐘"}, {"f": "dt_t10_practice", "t": "實務應用與解釋", "ids": [95, 18, 103, 105, 106, 62, 48, 49, 66, 67, 31, 81, 53, 77, 80], "ab": true, "len": "2 個版本・各約 2–3 分鐘"}], "reg": [{"f": "reg_t1_basic_scatter", "t": "基本概念與散佈圖", "len": "約 2 分鐘"}, {"f": "reg_t2_line_predict", "t": "迴歸線與預測", "len": "約 2 分鐘"}, {"f": "reg_t3_correlation", "t": "相關係數與關係強弱", "len": "約 2 分鐘"}, {"f": "reg_t4_outlier_diag", "t": "離群值與模型診斷", "len": "約 2 分鐘"}, {"f": "reg_t5_causal", "t": "因果與混淆陷阱", "len": "約 2 分鐘"}, {"f": "reg_t6_advanced", "t": "進階觀念", "ids": ["R0407", "R0409", "R0411", "R0609", "R0313", "R1209", "R0413", "R1007", "R0314", "R1210"], "len": "約 2 分鐘"}]}, RANGE={"km": "每支約 1 分鐘", "vz": "每支約 2–4 分鐘", "dt": "每支約 2–3 分鐘", "reg": "每支約 2 分鐘"}, NAME={1:"初級",2:"中級",3:"高級"}, COL={1:"#1a9e6e",2:"#c98a00",3:"#d4572a"};
   var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});};
   function init(){ return {lv:C.START,n:0,blk:[],cur:{lv:C.START,n:0,ok:0,ty:[]},seen:{},last:null}; }
   /* 從「目前這一級」挑題：同一組盡量不同題目類型、整體考比較少的類型優先、同分隨機；這一級沒題了才往旁邊一級借 */
@@ -271,7 +271,7 @@ window.__BLK=(function(){
     try{ if(window.ULAB&&ULAB.ev) ULAB.ev("blk_vid_ab",{f:f,v:b}); }catch(e){}
     return false;
   }
-  function vlen(v){ return v.ab?"2 個版本・各約 2–3 分鐘":"約 2 分鐘"; }
+  function vlen(v){ return v.len || (v.ab?"2 個版本・各約 2–3 分鐘":"約 2 分鐘"); }
   function vidHTML(topic,rows){
     var V=VIDS[topic]||[]; if(!V.length) return "";
     var w=V.map(function(){return 0;}), n=V.map(function(){return 0;});
@@ -280,7 +280,7 @@ window.__BLK=(function(){
       .sort(function(a,b){ return w[b]-w[a] || w[b]/n[b]-w[a]/n[a]; });
     if(!pick.length) return "";
     var h='<div class="blk-vid" style="margin:16px 0;padding:12px 14px;border-radius:12px;border-left:5px solid #d4572a;background:rgba(128,128,128,.06)">'+
-      '<div style="font-weight:800;margin:0 0 4px">🎬 答錯的題目類型，用影片補起來</div><div style="font-size:13px;opacity:.75;margin:0 0 6px">每支約 1–4 分鐘：</div>';
+      '<div style="font-weight:800;margin:0 0 4px">🎬 答錯的題目類型，用影片補起來</div><div style="font-size:13px;opacity:.75;margin:0 0 6px">'+(RANGE[topic]||"每支約 1–4 分鐘")+'：</div>';
     pick.forEach(function(i,k){ var v=V[i];
       h+='<details id="blkv-'+topic+'-'+i+'" style="border-top:1px solid rgba(128,128,128,.2);padding:8px 0"'+(k===0?' open':'')+'><summary style="cursor:pointer;font-weight:700">🎬 '+esc(v.t)+
         ' <span style="font-weight:500;font-size:13px;color:#b5462a;margin-left:6px">錯 '+w[i]+'／'+n[i]+' 題</span></summary>'+
@@ -595,7 +595,6 @@ function submit(conf){
   if(S.phase==="rem")S.rem.res.push(row);
   log("submit",q.id,{chosen:row.chosen,correct:row.correct,mis,conf});
   $("qConf").hidden=true;
-  // 前後測不給解答，直接下一題
   /* 2026-11-24：前後測也馬上給答案（原本直接下一題） */
   const btns=[...$("qOpts").children];
   btns.forEach((b,j)=>{b.disabled=true;
